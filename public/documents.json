@@ -1,0 +1,20 @@
+[
+  {
+    "id": "static-1",
+    "title": "Tutuklama Prosedürü",
+    "category": "sop",
+    "date": "2025-01-15",
+    "file_url": "/documents/sample.pdf",
+    "file_type": "pdf",
+    "description": "Şüpheli tutuklama ve gözaltına alma süreçleri."
+  },
+  {
+    "id": "static-2",
+    "title": "Araç Takip Protokolü",
+    "category": "sop",
+    "date": "2025-01-10",
+    "file_url": "/documents/sample.pdf",
+    "file_type": "pdf",
+    "description": "Araç takip ve durdurma operasyonları için standart prosedürler."
+  }
+]

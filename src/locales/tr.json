@@ -1,0 +1,242 @@
+{
+  "nav": {
+    "home": "Ana Sayfa",
+    "about": "Hakkımızda",
+    "rules": "Kurallar",
+    "documents": "Belgeler",
+    "gallery": "Galeri",
+    "faq": "SSS",
+    "apply": "Başvur",
+    "brand": "U.S. MARSHALS"
+  },
+  "hero": {
+    "badge": "United States Marshals Service",
+    "title1": "JUSTICE.",
+    "title2": "INTEGRITY.",
+    "title3": "SERVICE.",
+    "subtitle": "United States Marshals Service, San Andreas Bölgesi'nin en köklü federal yasa uygulama birimidir. Adalet ve düzen için görev yapıyoruz.",
+    "rulesBtn": "Kuralları Oku",
+    "applyBtn": "Başvur"
+  },
+  "hero.stats": {
+    "agents": "Aktif Ajanlar",
+    "operations": "Başarılı Operasyon",
+    "founded": "Kuruluş"
+  },
+  "quickLinks": {
+    "title": "Hızlı Erişim",
+    "subtitle": "İhtiyacınız Olan Her Şey",
+    "rules": { "title": "Kurallar", "desc": "Birim kuralları ve prosedürleri" },
+    "documents": { "title": "Belgeler", "desc": "SOP ve eğitim materyalleri" },
+    "apply": { "title": "Başvuru", "desc": "US Marshal kadrosuna katıl" },
+    "announcements": { "title": "Duyurular", "desc": "Son haberler ve güncellemeler" }
+  },
+  "mission": {
+    "label": "Misyonumuz",
+    "title": "Federal Hukuk Uygulama",
+    "p1": "United States Marshals Service, San Andreas Bölgesi'nde federal yargı sisteminin korunması, kaçakların yakalanması ve tanık koruma programlarının yürütülmesinden sorumludur.",
+    "p2": "Birim olarak, yüksek standartlarda profesyonellik, adalet ve toplum güvenliği ilkeleriyle hareket ediyoruz. Her operasyon, titiz bir planlama ve eğitim sürecinin ürünüdür.",
+    "p3": "Kadromuza katılmak, sadece bir unvan değil; bir sorumluluk ve onurdur.",
+    "badgeAlt": "US Marshal Rozeti"
+  },
+  "footer": {
+    "brand": "U.S. MARSHALS SERVICE",
+    "desc": "District of San Andreas. Adalet, Dürüstlük ve Hizmet ilkeleriyle görev yapan federal yasa uygulama birimi.",
+    "quickLinks": "Hızlı Bağlantılar",
+    "contact": "İletişim",
+    "discord": "Discord Sunucusu",
+    "copyright": "© 2026 U.S. Marshals Service — District of San Andreas | FiveM Roleplay"
+  },
+  "about": {
+    "label": "Hakkımızda",
+    "title": "TARİHÇE & MİSYON",
+    "p1": "San Andreas genelinde adaleti tesis etmek ve federal yasaları tavizsiz uygulamak.",
+    "p2": "Birimiz, profesyonellik, disiplin ve adalet ilkeleri doğrultusunda faaliyet gösterir. Her ajan, titiz bir eğitim sürecinden geçer ve en yüksek standartlarda hizmet vermeyi taahhüt eder.",
+    "p3": "Department of Justice (Adalet Bakanlığı) bünyesinde faaliyet gösteren birimiz, federal hukuk uygulamasının temel direğidir.",
+    "values": "Değerlerimiz",
+    "justice": { "title": "Dürüstlük", "text": "Görevlerimizi en yüksek etik standartlarda ve şeffaflıkla yerine getiririz. Her kararımız hesap verebilir olmalıdır." },
+    "integrity": { "title": "Sadakat", "text": "Birime, yasalara ve adalet ilkelerine bağlılık temel taahhütümüzdür. Federal hukukun uygulanmasında taviz vermeyiz." },
+    "service": { "title": "Cesaret & Tarafsızlık", "text": "Zorlu koşullarda kararlılık ve cesaret sergileriz. Tüm işlemlerimizde tarafsızlık ve objektiflik esastır." },
+    "badgeAlt": "US Marshal Rozeti"
+  },
+  "chainOfCommand": {
+    "label": "Komuta Zinciri",
+    "title": "Hiyerarşik Yapı",
+    "chiefMarshal": { "rank": "Chief Marshal", "desc": "Birimin en üst düzey yetkilisi. Tüm operasyonların ve personelin nihai sorumluluğunu taşır." },
+    "supervisoryDeputy": { "rank": "Supervisory Deputy", "desc": "Operasyonel birimlerin yönetimi ve eğitim programlarının koordinasyonundan sorumludur." },
+    "seniorDeputy": { "rank": "Senior Deputy", "desc": "Kıdemli saha ajanı. Kompleks operasyonlarda liderlik eder ve yeni ajanları eğitir." },
+    "deputyMarshal": { "rank": "Deputy Marshal", "desc": "Saha ajanı. Tutuklama, mahkeme güvenliği ve tanık koruma görevlerini yürütür." }
+  },
+  "rules": {
+    "label": "Düzenlemeler",
+    "title": "BİRİM KURALLARI",
+    "intro": "Aşağıdaki kurallar tüm U.S. Marshals Service personeli için bağlayıcıdır. İhlaller disiplin işlemine tabi tutulacaktır.",
+    "discipline": "Genel Disiplin",
+    "uniform": "Kıyafet Yönetmeliği",
+    "weapons": "Silah Kullanımı",
+    "general": "Genel Disiplin",
+    "operations": "Operasyon Kuralları",
+    "comms": "İletişim Protokolleri",
+    "noteLabel": "Not:",
+    "note": "Bu kurallar, genel sunucu kurallarına ek olarak uygulanır. Tüm personel ayrıca sunucu kurallarına da uymakla yükümlüdür.",
+    "items": {
+      "1.1": "Operasyon sırasında telsiz disiplini esastır. Gereksiz konuşmalardan kaçınılmalıdır.",
+      "2.1": "Saha operasyonlarında standart US Marshal yeleği ve ekipman seti zorunludur.",
+      "3.1": "Ateşli silah kullanımı sadece can güvenliği tehdidi altında ve kademeli güç kullanımı prosedürüne (Use of Force Continuum) uygun olmalıdır.",
+      "1.2": "Birim iç iletişimi yalnızca belirlenmiş kanallar üzerinden yapılacaktır.",
+      "1.3": "Rütbe hiyerarşisine her koşulda uyulacaktır.",
+      "1.4": "Birim dışı operasyonlarda üst makamdan onay alınacaktır.",
+      "1.5": "Gizli bilgilerin paylaşımı kesinlikle yasaktır.",
+      "2.2": "Rozet ve kimlik her zaman görünür şekilde taşınacaktır.",
+      "2.3": "Taktik ekipman yalnızca onaylanmış operasyonlarda kullanılacaktır.",
+      "2.4": "Araç kullanımı yalnızca görev amaçlı olacaktır.",
+      "3.2": "Ateş açma yetkisi yalnızca meşru müdafaa veya hayati tehlike durumlarında kullanılacaktır.",
+      "3.3": "Tutuklama prosedürleri standart operasyon prosedürlerine uygun olarak yürütülecektir.",
+      "3.4": "Operasyon sonrası raporlar 24 saat içinde tamamlanacaktır.",
+      "4.1": "Telsiz iletişiminde resmi kodlar ve terminoloji kullanılacaktır.",
+      "4.2": "Acil durumlarda belirlenmiş acil çağrı prosedürleri izlenecektir.",
+      "4.3": "Birim dışı iletişimde birim kimliği açıkça belirtilecektir."
+    }
+  },
+  "documents": {
+    "label": "Arşiv",
+    "title": "BELGELER",
+    "intro": "Birim operasyon prosedürleri, eğitim materyalleri ve resmi form şablonları.",
+    "sop": "Standart Operasyon Prosedürleri",
+    "training": "Eğitim Materyalleri",
+    "forms": "Formlar & Şablonlar",
+    "types": { "sop": "SOP", "training": "Eğitim", "form": "Form" },
+    "docs": {
+      "arrest": { "title": "Tutuklama Prosedürü", "desc": "Şüpheli tutuklama ve gözaltına alma süreçleri." },
+      "vehicle": { "title": "Araç Takip Protokolü", "desc": "Araç takip ve durdurma operasyonları için standart prosedürler." },
+      "witness": { "title": "Tanık Koruma Programı", "desc": "Tanık koruma ve güvenli transfer prosedürleri." },
+      "newAgent": { "title": "Yeni Ajan Eğitim Kılavuzu", "desc": "Birime yeni katılan ajanlar için temel eğitim materyalleri." },
+      "tactical": { "title": "Taktik Operasyon Eğitimi", "desc": "İleri düzey taktik ve operasyonel eğitim dokümanı." },
+      "radio": { "title": "İletişim & Telsiz Kullanımı", "desc": "Telsiz protokolleri ve resmi iletişim kodları." },
+      "report": { "title": "Operasyon Raporu Şablonu", "desc": "Operasyon sonrası hazırlanacak rapor formatı." },
+      "memo": { "title": "İç Yazışma Formu", "desc": "Birim içi resmi yazışma şablonu." },
+      "leave": { "title": "İzin & Devamsızlık Formu", "desc": "Personel izin ve devamsızlık bildirim formu." }
+    },
+    "view": "Görüntüle",
+    "download": "İndir",
+    "search": "Belge ara...",
+    "filterAll": "Tümü",
+    "noResults": "Sonuç bulunamadı.",
+    "filterSop": "SOP",
+    "filterTraining": "Eğitim",
+    "filterCase": "Dava Dosyaları",
+    "filterForm": "Form",
+    "filterAnnouncement": "Duyuru",
+    "filterProtocol": "Protokol"
+  },
+  "gallery": {
+    "label": "Medya",
+    "title": "GALERİ",
+    "intro": "Operasyonlardan, birim toplantılarından ve etkinliklerden kareler.",
+    "placeholder": "Görsel Eklenecek"
+  },
+  "faq": {
+    "label": "Yardım",
+    "title": "SIKÇA SORULAN SORULAR",
+    "items": {
+      "process": { "q": "Başvuru süreci ne kadar sürer?", "a": "Başvurunuz incelendikten sonra 48 saat içinde Discord üzerinden dönüş sağlanır." },
+      "exp": { "q": "Deneyim şart mı?", "a": "Temel FiveM RP bilgisi şarttır, ancak özel eğitimler akademi birimimiz tarafından verilir." },
+      "training": { "q": "Eğitim süreci nasıl işliyor?", "a": "Kabul edilen adaylar bir haftalık temel eğitim programından geçer. Bu süre zarfında operasyon prosedürleri, iletişim protokolleri ve taktik eğitim verilir." },
+      "activity": { "q": "Haftalık minimum aktivite gereksinimi var mı?", "a": "Evet, tüm ajanların haftada minimum 10 saat aktif görev yapması beklenir. Uzun süreli devamsızlıklarda izin formu doldurulmalıdır." },
+      "transfer": { "q": "Başka bir birimden transfer yapabilir miyim?", "a": "Evet, diğer birimlerden transfer mümkündür. Mevcut rütbeniz ve deneyiminiz değerlendirmeye alınır." },
+      "promotion": { "q": "Birim içi terfi sistemi nasıl çalışır?", "a": "Terfiler performans, aktivite ve liderlik niteliklerine göre komuta zinciri tarafından değerlendirilir. Minimum bekleme süreleri rütbeye göre değişir." }
+    }
+  },
+  "apply": {
+    "label": "Kayıt",
+    "title": "BAŞVURU FORMU",
+    "intro": "U.S. Marshals Service kadrosuna katılmak için aşağıdaki formu eksiksiz doldurun. Başvurunuz komuta zincirimiz tarafından değerlendirilecektir.",
+    "prereq": "Ön Koşullar",
+    "prereq1": "Discord sunucumuzda aktif üye olmalısınız",
+    "prereq2": "Minimum 18 yaşında olmalısınız",
+    "prereq3": "Sunucuda en az 2 haftalık deneyiminiz olmalıdır",
+    "prereq4": "Aktif cezai işlem kaydınız olmamalıdır",
+    "fields": {
+      "name": "İsim *",
+      "namePlaceholder": "Oyun içi isminiz",
+      "discord": "Discord Adı *",
+      "discordPlaceholder": "kullanıcı#0000",
+      "fivemId": "FiveM ID *",
+      "fivemPlaceholder": "Steam/FiveM ID",
+      "age": "Yaş *",
+      "agePlaceholder": "18+",
+      "experience": "RP Deneyimi",
+      "experienceSelect": "Seçin",
+      "experienceOpts": {
+        "beginner": "Başlangıç (0-6 ay)",
+        "intermediate": "Orta (6-12 ay)",
+        "experienced": "Deneyimli (1-2 yıl)",
+        "veteran": "Uzman (2+ yıl)"
+      },
+      "reason": "Neden US Marshal Olmak İstiyorsunuz? *",
+      "reasonPlaceholder": "Motivasyonunuzu açıklayın...",
+      "scenario": "Senaryo Sorusu *",
+      "scenarioHint": "Bir tutuklama operasyonu sırasında şüpheli ateşli silah çekiyor. Bu durumda ne yaparsınız?",
+      "scenarioPlaceholder": "Cevabınız..."
+    },
+    "submit": "Başvuruyu Gönder",
+    "submitting": "DOJ Güvenli Sunucusuna İletiliyor...",
+    "successTitle": "Başvuru Gönderildi",
+    "successMsg": "Başvurunuz DOJ güvenli sunucusuna iletildi. En kısa sürede sizinle iletişime geçilecektir.",
+    "validateAll": "Lütfen tüm zorunlu alanları doldurun.",
+    "steps": {
+      "personal": "Kişisel Bilgiler",
+      "experience": "Deneyim & Motivasyon",
+      "scenario": "Senaryo"
+    },
+    "back": "Geri",
+    "next": "İleri"
+  },
+  "404": {
+    "title": "404",
+    "message": "Sayfa bulunamadı",
+    "back": "Ana Sayfaya Dön"
+  },
+  "admin": {
+    "loginTitle": "Admin Girişi",
+    "password": "Şifre",
+    "login": "Giriş Yap",
+    "logout": "Çıkış",
+    "wrongPassword": "Geçersiz şifre.",
+    "title": "Başlık",
+    "categoryLabel": "Kategori",
+    "category": {
+      "case": "Dava Dosyaları",
+      "announcement": "Duyuru",
+      "protocol": "Protokol",
+      "sop": "SOP",
+      "training": "Eğitim",
+      "form": "Form"
+    },
+    "date": "Tarih",
+    "fileUpload": "Dosya Yükle (PDF/PNG)",
+    "description": "Açıklama",
+    "add": "Ekle",
+    "edit": "Düzenle",
+    "update": "Güncelle",
+    "delete": "Sil",
+    "cancel": "İptal",
+    "addDoc": "Belge Ekle",
+    "editDoc": "Belge Düzenle",
+    "docList": "Belge Listesi",
+    "backToDocs": "← Belgeler",
+    "fillRequired": "Başlık ve dosya zorunludur.",
+    "needFileUrl": "Dosya URL'si girin veya dosya yükleyin.",
+    "added": "Belge eklendi.",
+    "updated": "Belge güncellendi.",
+    "deleted": "Belge silindi.",
+    "error": "Bir hata oluştu.",
+    "uploadError": "Dosya yükleme başarısız.",
+    "saving": "Kaydediliyor...",
+    "loading": "Yükleniyor...",
+    "noDocs": "Henüz belge yok.",
+    "confirmDelete": "Bu belgeyi silmek istediğinize emin misiniz?",
+    "supabaseRequired": "Supabase yapılandırılmamış",
+    "supabaseHint": "Admin paneli için .env dosyasında VITE_SUPABASE_URL ve VITE_SUPABASE_ANON_KEY tanımlayın."
+  }
+}
