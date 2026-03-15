@@ -9,7 +9,7 @@ create table if not exists form_config (
 );
 
 insert into form_config (key, value) values
-  ('personal', '{"name":{"enabled":true,"label":"İsim","placeholder":"Oyun içi isminiz"},"age":{"enabled":true,"label":"Yaş","placeholder":"18+"},"discord":{"enabled":true,"label":"Discord Adı","placeholder":"kullanıcı#0000"},"hexId":{"enabled":true,"label":"Hex ID","placeholder":"Steam/FiveM ID"}}'),
+  ('personal', '{"name":{"enabled":true,"label":"İsim","placeholder":"Oyun içi isminiz"},"age":{"enabled":true,"label":"Yaş","placeholder":"18+"},"discord":{"enabled":true,"label":"Discord ID","placeholder":"Discord''da sağ tık > ID''yi Kopyala (17-19 haneli sayı)"},"hexId":{"enabled":true,"label":"Hex ID","placeholder":"Steam/FiveM ID"}}'),
   ('experience', '{"title":"Deneyim & Motivasyon","reasonLabel":"Neden US Marshal Olmak İstiyorsunuz?","reasonPlaceholder":"Motivasyonunuzu açıklayın...","experienceLabel":"RP Deneyimi","experienceOptions":["Başlangıç (0-6 ay)","Orta (6-12 ay)","Deneyimli (1-2 yıl)","Uzman (2+ yıl)"]}')
 on conflict (key) do nothing;
 

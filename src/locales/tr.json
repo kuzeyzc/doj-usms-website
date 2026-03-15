@@ -145,11 +145,15 @@
     "label": "Medya",
     "title": "GALERİ",
     "intro": "Operasyonlardan, birim toplantılarından ve etkinliklerden kareler.",
-    "placeholder": "Görsel Eklenecek"
+    "placeholder": "Görsel Eklenecek",
+    "close": "Kapat",
+    "prev": "Önceki görsel",
+    "next": "Sonraki görsel"
   },
   "faq": {
     "label": "Yardım",
     "title": "SIKÇA SORULAN SORULAR",
+    "intro": "USMS ve federal adalet sistemi hakkında sıkça sorulan soruların yanıtları.",
     "items": {
       "process": { "q": "Başvuru süreci ne kadar sürer?", "a": "Başvurunuz incelendikten sonra 48 saat içinde Discord üzerinden dönüş sağlanır." },
       "exp": { "q": "Deneyim şart mı?", "a": "Temel FiveM RP bilgisi şarttır, ancak özel eğitimler akademi birimimiz tarafından verilir." },
@@ -249,6 +253,42 @@
     "noDocs": "Henüz belge yok.",
     "confirmDelete": "Bu belgeyi silmek istediğinize emin misiniz?",
     "supabaseRequired": "Supabase yapılandırılmamış",
-    "supabaseHint": "Admin paneli için .env dosyasında VITE_SUPABASE_URL ve VITE_SUPABASE_ANON_KEY tanımlayın."
+    "supabaseHint": "Admin paneli için .env dosyasında VITE_SUPABASE_URL ve VITE_SUPABASE_ANON_KEY tanımlayın.",
+    "applications": {
+      "title": "Gelen Başvurular",
+      "listTitle": "Başvuru Listesi",
+      "empty": "Henüz başvuru yok.",
+      "fileTitle": "Başvuru Dosyası",
+      "statusPending": "Beklemede",
+      "statusApproved": "Onaylandı",
+      "statusRejected": "Reddedildi",
+      "statusUpdated": "Durum güncellendi.",
+      "discordNotifyFailed": "Discord bildirimi gönderilemedi.",
+      "updateFailed": "Güncelleme başarısız.",
+      "personalInfo": "Kişisel Bilgiler",
+      "nameIcOoc": "İsim IC / OOC",
+      "discordName": "Discord Adı",
+      "discordId": "Discord Kullanıcı ID",
+      "age": "Yaş",
+      "experience": "Deneyim",
+      "motivation": "Motivasyon",
+      "scenarioAnswers": "Senaryo Cevapları",
+      "questionArchived": "Soru (arşiv)",
+      "applicationDate": "Başvuru tarihi",
+      "openFile": "Dosyayı Aç",
+      "name": "İsim",
+      "discord": "Discord",
+      "fivemId": "FiveM ID",
+      "status": "Durum",
+      "date": "Tarih"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "documents": "Belgeler",
+      "chainOfCommand": "Komuta Zinciri",
+      "gallery": "Galeri",
+      "applications": "Başvurular",
+      "recentApplications": "Son Başvurular"
+    }
   }
 }

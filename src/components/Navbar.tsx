@@ -20,7 +20,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { pathname } = useLocation();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { general } = useSiteSettings();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -34,12 +34,6 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const toggleLang = () => {
-    const next = i18n.language === "tr" ? "en" : "tr";
-    i18n.changeLanguage(next);
-    document.documentElement.lang = next;
-  };
 
   return (
     <nav
@@ -75,14 +69,6 @@ export default function Navbar() {
               </span>
             </Link>
           ))}
-          {/* Dil Değiştirici */}
-          <button
-            type="button"
-            onClick={toggleLang}
-            className="ml-2 px-3 py-1.5 text-xs font-heading font-semibold rounded-sm border border-primary/30 text-foreground hover:border-primary/60 hover:bg-primary/5 transition-colors"
-          >
-            {i18n.language === "tr" ? "EN" : "TR"}
-          </button>
           {/* Tema Toggle */}
           {mounted && (
             <motion.button
@@ -129,16 +115,6 @@ export default function Navbar() {
                 </Link>
               ))}
               <div className="flex items-center gap-2 px-4 py-3 mt-2 border-t border-primary/10">
-                <button
-                  type="button"
-                  onClick={() => {
-                    toggleLang();
-                    setOpen(false);
-                  }}
-                  className="px-3 py-1.5 text-xs font-heading font-semibold rounded-sm border border-primary/30"
-                >
-                  {i18n.language === "tr" ? "EN" : "TR"}
-                </button>
                 {mounted && (
                   <button
                     type="button"

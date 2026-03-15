@@ -3,12 +3,83 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Pencil, Trash2, Plus } from "lucide-react";
-import { fetchChainOfCommand, upsertChainItem, deleteChainItem } from "@/lib/supabase-cms";
+import { Pencil, Trash2, GripVertical } from "lucide-react";
+import { fetchChainOfCommand, upsertChainItem, deleteChainItem, updateChainOrder } from "@/lib/supabase-cms";
 import { isSupabaseEnabled } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useState } from "react";
 import type { ChainOfCommandItem } from "@/lib/supabase-cms";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+function SortableRankCard({
+  item,
+  onEdit,
+  onDelete,
+}: {
+  item: ChainOfCommandItem;
+  onEdit: (item: ChainOfCommandItem) => void;
+  onDelete: (id: string) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-3 p-4 bg-surface-elevated rounded-lg border border-primary/10 ${isDragging ? "opacity-80 shadow-lg z-10" : ""}`}
+    >
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors touch-none"
+        aria-label="Sırayı değiştirmek için sürükle"
+      >
+        <GripVertical className="w-5 h-5" />
+      </button>
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold">{item.rank}</p>
+        <p className="text-sm text-muted-foreground">{item.name}</p>
+      </div>
+      <div className="flex gap-2 shrink-0">
+        <Button size="icon" variant="ghost" onClick={() => onEdit(item)}>
+          <Pencil className="w-4 h-4" />
+        </Button>
+        <Button size="icon" variant="ghost" className="text-destructive" onClick={() => onDelete(item.id)}>
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminHierarchy() {
   const queryClient = useQueryClient();
@@ -20,6 +91,35 @@ export default function AdminHierarchy() {
     queryFn: fetchChainOfCommand,
     enabled: isSupabaseEnabled,
   });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = items.findIndex((i) => i.id === active.id);
+    const newIndex = items.findIndex((i) => i.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reordered = arrayMove(items, oldIndex, newIndex);
+    const updates = reordered.map((item, idx) => ({ id: item.id, sort_order: idx }));
+
+    const ok = await updateChainOrder(updates);
+    if (ok) {
+      queryClient.invalidateQueries({ queryKey: ["chainOfCommand"] });
+      toast.success("Sıra güncellendi.");
+    } else {
+      toast.error("Sıra güncellenirken hata oluştu.");
+    }
+  };
 
   const handleSave = async () => {
     if (!form.rank || !form.description) {
@@ -81,22 +181,19 @@ export default function AdminHierarchy() {
         </CardContent>
       </Card>
       <div className="space-y-2">
-        {items.map((item) => (
-          <div key={item.id} className="flex items-center justify-between p-4 bg-surface-elevated rounded-lg border border-primary/10">
-            <div>
-              <p className="font-semibold">{item.rank}</p>
-              <p className="text-sm text-muted-foreground">{item.name}</p>
-            </div>
-            <div className="flex gap-2">
-              <Button size="icon" variant="ghost" onClick={() => { setEditing(item); setForm({ rank: item.rank, name: item.name, description: item.description }); }}>
-                <Pencil className="w-4 h-4" />
-              </Button>
-              <Button size="icon" variant="ghost" className="text-destructive" onClick={() => handleDelete(item.id)}>
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        ))}
+        <p className="text-sm text-muted-foreground mb-3">Rütbeleri sürükleyerek sıralayabilirsiniz.</p>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+            {items.map((item) => (
+              <SortableRankCard
+                key={item.id}
+                item={item}
+                onEdit={(i) => { setEditing(i); setForm({ rank: i.rank, name: i.name, description: i.description }); }}
+                onDelete={handleDelete}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
       </div>
     </div>
   );

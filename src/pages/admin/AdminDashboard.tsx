@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Users, Image, ClipboardList } from "lucide-react";
 import { fetchDocuments } from "@/lib/supabase";
@@ -6,6 +7,7 @@ import { fetchChainOfCommand, fetchGallery, fetchApplications } from "@/lib/supa
 import { isSupabaseEnabled } from "@/lib/supabase";
 
 export default function AdminDashboard() {
+  const { t } = useTranslation();
   const { data: docs = [] } = useQuery({
     queryKey: ["documents"],
     queryFn: fetchDocuments,
@@ -28,25 +30,25 @@ export default function AdminDashboard() {
   });
 
   const stats = [
-    { label: "Belgeler", value: docs.length, icon: FileText },
-    { label: "Komuta Zinciri", value: chain.length, icon: Users },
-    { label: "Galeri", value: gallery.length, icon: Image },
-    { label: "Başvurular", value: applications.length, icon: ClipboardList },
+    { labelKey: "admin.dashboard.documents", value: docs.length, icon: FileText },
+    { labelKey: "admin.dashboard.chainOfCommand", value: chain.length, icon: Users },
+    { labelKey: "admin.dashboard.gallery", value: gallery.length, icon: Image },
+    { labelKey: "admin.dashboard.applications", value: applications.length, icon: ClipboardList },
   ];
 
   return (
     <div>
-      <h1 className="font-heading text-2xl font-bold mb-6">Dashboard</h1>
+      <h1 className="font-heading text-2xl font-bold mb-6">{t("admin.dashboard.title")}</h1>
       {!isSupabaseEnabled && (
         <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg text-sm">
-          Supabase yapılandırılmamış. CMS özellikleri için .env dosyasında VITE_SUPABASE_URL ve VITE_SUPABASE_ANON_KEY tanımlayın.
+          {t("admin.supabaseRequired")}. {t("admin.supabaseHint")}
         </div>
       )}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((s) => (
-          <Card key={s.label} className="border-primary/15">
+          <Card key={s.labelKey} className="border-primary/15">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{s.label}</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t(s.labelKey)}</CardTitle>
               <s.icon className="w-4 h-4 text-primary" />
             </CardHeader>
             <CardContent>
@@ -58,7 +60,7 @@ export default function AdminDashboard() {
       {applications.length > 0 && (
         <Card className="mt-6 border-primary/15">
           <CardHeader>
-            <CardTitle>Son Başvurular</CardTitle>
+            <CardTitle>{t("admin.dashboard.recentApplications")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">

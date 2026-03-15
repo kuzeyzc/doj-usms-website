@@ -16,7 +16,7 @@ import { useDocuments } from "@/hooks/useDocuments";
 import DocumentPreviewModal from "@/components/DocumentPreviewModal";
 import type { DocumentRecord } from "@/types/document";
 import { format } from "date-fns";
-import { tr, enUS } from "date-fns/locale";
+import { tr } from "date-fns/locale";
 import { formatTime } from "@/lib/utils";
 
 const CATEGORIES: { key: "all" | DocumentRecord["category"]; labelKey: string; icon: typeof FileText }[] = [
@@ -44,7 +44,7 @@ function getCategoryLabelKey(category: DocumentRecord["category"]): string {
 }
 
 export default function DocumentsPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | DocumentRecord["category"]>("all");
   const [previewDoc, setPreviewDoc] = useState<DocumentRecord | null>(null);
@@ -67,7 +67,7 @@ export default function DocumentsPage() {
     return list;
   }, [docs, filter, search]);
 
-  const dateLocale = i18n.language === "tr" ? tr : enUS;
+  const dateLocale = tr;
 
   /** created_at'e göre gün bazında gruplandırma (en yeni gün en üstte, aynı gün içinde en yeni en üstte) */
   const groupedByDate = useMemo(() => {
@@ -202,13 +202,17 @@ export default function DocumentsPage() {
                           className="gold-border-top flex flex-col sm:flex-row sm:items-center gap-4 bg-surface-elevated rounded-lg p-5 border border-primary/10 hover:border-primary/25 transition-colors"
                         >
                           <div className="flex items-start gap-4 flex-1 min-w-0">
-                            <div className="w-20 h-24 rounded-lg overflow-hidden bg-primary/5 flex-shrink-0 border border-primary/10 flex items-center justify-center relative">
+                            <button
+                              type="button"
+                              onClick={() => setPreviewDoc(doc)}
+                              className="w-20 h-24 rounded-lg overflow-hidden bg-primary/5 flex-shrink-0 border border-primary/10 flex items-center justify-center relative cursor-pointer hover:border-primary/30 hover:ring-2 hover:ring-primary/20 transition-all group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                            >
                               {isImageUrl(getDocUrls(doc)[0], doc.file_type) ? (
                                 <>
                                   <img
                                     src={resolveUrl(getDocUrls(doc)[0])}
                                     alt=""
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                                     onError={(e) => {
                                       const el = e.target as HTMLImageElement;
                                       el.style.display = "none";
@@ -222,7 +226,7 @@ export default function DocumentsPage() {
                               ) : (
                                 <FileText className="w-8 h-8 text-primary" />
                               )}
-                            </div>
+                            </button>
                             <div className="flex-1 min-w-0">
                               <div className="flex flex-wrap items-center gap-2 mb-1">
                                 <h4 className="font-heading font-semibold text-foreground">

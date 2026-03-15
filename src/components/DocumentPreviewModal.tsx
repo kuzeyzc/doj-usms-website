@@ -5,7 +5,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface DocumentPreviewModalProps {
@@ -53,28 +52,34 @@ export default function DocumentPreviewModal({
             {title}
           </DialogTitle>
           {pages > 1 && (
-            <div className="flex items-center gap-2 shrink-0">
-              <Button
-                size="icon"
-                variant="outline"
+            <div className="flex items-center gap-1 shrink-0 rounded-lg bg-primary/10 border border-primary/25 p-1.5 shadow-sm">
+              <button
+                type="button"
                 onClick={goPrev}
                 disabled={page === 0}
-                className="h-8 w-8"
+                className="flex items-center justify-center w-10 h-10 rounded-md text-primary font-heading font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary/20 hover:text-primary-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+                aria-label="Önceki sayfa"
               >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <span className="text-sm font-heading tabular-nums min-w-[4ch]">
-                {page + 1} / {pages}
-              </span>
-              <Button
-                size="icon"
-                variant="outline"
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <div className="flex items-center justify-center min-w-[5rem] px-3 py-2">
+                <span className="text-sm font-heading font-bold tabular-nums text-foreground">
+                  {page + 1}
+                </span>
+                <span className="text-muted-foreground mx-1">/</span>
+                <span className="text-sm font-heading font-semibold tabular-nums text-muted-foreground">
+                  {pages}
+                </span>
+              </div>
+              <button
+                type="button"
                 onClick={goNext}
                 disabled={page >= pages - 1}
-                className="h-8 w-8"
+                className="flex items-center justify-center w-10 h-10 rounded-md text-primary font-heading font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary/20 hover:text-primary-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+                aria-label="Sonraki sayfa"
               >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
           )}
         </DialogHeader>

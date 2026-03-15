@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Plus } from "lucide-react";
 import { fetchFaq, upsertFaqItem, deleteFaqItem } from "@/lib/supabase-cms";
 import { isSupabaseEnabled } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -56,9 +56,21 @@ export default function AdminFaq() {
     return <div className="p-4 bg-muted/30 rounded-lg">Supabase yapılandırılmamış.</div>;
   }
 
+  const handleAddNew = () => {
+    setEditing(null);
+    setQuestion("");
+    setAnswer("");
+  };
+
   return (
     <div>
-      <h1 className="font-heading text-2xl font-bold mb-6">Sıkça Sorulan Sorular</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-heading text-2xl font-bold">Sıkça Sorulan Sorular</h1>
+        <Button variant="outline" onClick={handleAddNew}>
+          <Plus className="w-4 h-4 mr-2" />
+          Yeni Soru
+        </Button>
+      </div>
       <Card className="border-primary/15 mb-6">
         <CardHeader>
           <CardTitle>{editing ? "Düzenle" : "Yeni Soru"}</CardTitle>
@@ -66,15 +78,19 @@ export default function AdminFaq() {
         <CardContent className="space-y-4">
           <div>
             <Label>Soru</Label>
-            <Input value={question} onChange={(e) => setQuestion(e.target.value)} className="input-glow" />
+            <Input value={question} onChange={(e) => setQuestion(e.target.value)} className="input-glow" placeholder="Soru metnini girin..." />
           </div>
           <div>
             <Label>Cevap</Label>
-            <Textarea value={answer} onChange={(e) => setAnswer(e.target.value)} className="input-glow" rows={3} />
+            <Textarea value={answer} onChange={(e) => setAnswer(e.target.value)} className="input-glow min-h-[120px]" rows={4} placeholder="Cevap metnini girin..." />
           </div>
           <div className="flex gap-2">
             <Button onClick={handleSave}>Kaydet</Button>
-            {editing && <Button variant="outline" onClick={() => { setEditing(null); setQuestion(""); setAnswer(""); }}>İptal</Button>}
+            {(editing || question || answer) && (
+              <Button variant="outline" onClick={handleAddNew}>
+                İptal
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>

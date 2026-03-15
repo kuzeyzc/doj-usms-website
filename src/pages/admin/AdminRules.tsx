@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { fetchRules, upsertRule, deleteRule } from "@/lib/supabase-cms";
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2, Plus } from "lucide-react";
 import { isSupabaseEnabled } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -13,8 +14,8 @@ import type { RuleCategory } from "@/lib/supabase-cms";
 export default function AdminRules() {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState<RuleCategory | null>(null);
-  const [category, setCategory] = useState("");
-  const [items, setItems] = useState<{ item_id: string; content: string }[]>([]);
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
 
   const { data: rules = [] } = useQuery({
     queryKey: ["rules"],
@@ -24,49 +25,58 @@ export default function AdminRules() {
 
   const loadForEdit = (r: RuleCategory) => {
     setEditing(r);
-    setCategory(r.category);
-    setItems((r.items ?? []).map((i) => ({ item_id: i.item_id, content: i.content })));
+    setTitle(r.title ?? r.category ?? "");
+    setContent(
+      r.content ??
+        (r.items ?? [])
+          .map((i) => (i.item_id ? `${i.item_id} ${i.content}` : i.content))
+          .join("\n\n") ??
+        ""
+    );
   };
 
   const handleSave = async () => {
-    if (!category.trim()) {
-      toast.error("Kategori adı zorunludur.");
+    if (!title.trim()) {
+      toast.error("Başlık zorunludur.");
       return;
     }
-    const id = await upsertRule(
-      { id: editing?.id, category, sort_order: editing?.sort_order ?? rules.length },
-      items.filter((i) => i.content.trim())
-    );
+    const id = await upsertRule({
+      id: editing?.id,
+      title: title.trim(),
+      content: content.trim() || undefined,
+      sort_order: editing?.sort_order ?? rules.length,
+    });
     if (id) {
       queryClient.invalidateQueries({ queryKey: ["rules"] });
       toast.success("Kaydedildi.");
       setEditing(null);
-      setCategory("");
-      setItems([]);
+      setTitle("");
+      setContent("");
+    } else {
+      toast.error("Kaydetme başarısız.");
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Bu kural kategorisini silmek istediğinize emin misiniz? Tüm maddeler de silinecektir.")) return;
+    if (!confirm("Bu kuralı silmek istediğinize emin misiniz?")) return;
     const ok = await deleteRule(id);
     if (ok) {
       queryClient.invalidateQueries({ queryKey: ["rules"] });
       toast.success("Kural silindi.");
       if (editing?.id === id) {
         setEditing(null);
-        setCategory("");
-        setItems([]);
+        setTitle("");
+        setContent("");
       }
     } else {
       toast.error("Silme başarısız.");
     }
   };
 
-  const addItem = () => {
-    const n = items.length + 1;
-    const cat = (editing?.category ?? category) || "genel";
-    const prefix = cat === "general" ? "1" : cat === "uniform" ? "2" : cat === "operations" ? "3" : "4";
-    setItems([...items, { item_id: `${prefix}.${n}`, content: "" }]);
+  const handleAddNew = () => {
+    setEditing(null);
+    setTitle("");
+    setContent("");
   };
 
   if (!isSupabaseEnabled) {
@@ -78,51 +88,93 @@ export default function AdminRules() {
       <h1 className="font-heading text-2xl font-bold mb-6">Kurallar</h1>
       <Card className="border-primary/15 mb-6">
         <CardHeader>
-          <CardTitle>{editing ? "Kural Düzenle" : "Yeni Kategori"}</CardTitle>
+          <CardTitle>{editing ? "Kural Düzenle" : "Yeni Kural"}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label>Kategori Adı</Label>
-            <Input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="örn: Genel Kurallar" className="input-glow" />
+            <Label>Başlık</Label>
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="örn: 1 - USMS Nedir?"
+              className="input-glow"
+            />
           </div>
           <div>
-            <div className="flex justify-between items-center mb-2">
-              <Label>Maddeler</Label>
-              <Button size="sm" variant="outline" onClick={addItem}>+ Madde</Button>
-            </div>
-            <div className="space-y-2">
-              {items.map((it, i) => (
-                <div key={i} className="flex gap-2">
-                  <Input value={it.item_id} onChange={(e) => setItems(items.map((x, j) => j === i ? { ...x, item_id: e.target.value } : x))} placeholder="1.1" className="w-20 input-glow" />
-                  <Input value={it.content} onChange={(e) => setItems(items.map((x, j) => j === i ? { ...x, content: e.target.value } : x))} placeholder="Kural metni" className="flex-1 input-glow" />
-                </div>
-              ))}
-            </div>
+            <Label>İçerik</Label>
+            <Textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Kural metni... Satır sonları korunur. Alt maddeler için a., b., c. kullanın."
+              className="input-glow min-h-[200px] font-mono text-sm"
+              rows={12}
+            />
           </div>
           <div className="flex gap-2">
             <Button onClick={handleSave}>Kaydet</Button>
-            {editing && <Button variant="outline" onClick={() => { setEditing(null); setCategory(""); setItems([]); }}>İptal</Button>}
+            {editing && (
+              <Button variant="outline" onClick={handleAddNew}>
+                Yeni Ekle
+              </Button>
+            )}
+            {(editing || title || content) && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setEditing(null);
+                  setTitle("");
+                  setContent("");
+                }}
+              >
+                İptal
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
       <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading text-lg font-semibold">Mevcut Kurallar</h2>
+          <Button size="sm" variant="outline" onClick={handleAddNew}>
+            <Plus className="w-4 h-4 mr-1" />
+            Yeni Kural
+          </Button>
+        </div>
         {rules.map((r) => (
           <Card key={r.id} className="border-primary/15">
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg">{r.category}</CardTitle>
+              <CardTitle className="text-lg">
+                {r.title ?? r.category ?? "Başlıksız"}
+              </CardTitle>
               <div className="flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => loadForEdit(r)}>Düzenle</Button>
-                <Button size="sm" variant="outline" className="text-destructive hover:text-destructive" onClick={() => handleDelete(r.id)}>
+                <Button size="sm" variant="outline" onClick={() => loadForEdit(r)}>
+                  <Pencil className="w-4 h-4 mr-1" />
+                  Düzenle
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => handleDelete(r.id)}
+                >
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-1 text-sm">
-                {(r.items ?? []).map((i) => (
-                  <li key={i.id}><span className="text-primary font-mono">§{i.item_id}</span> {i.content}</li>
-                ))}
-              </ul>
+              {r.content ? (
+                <pre className="text-sm text-muted-foreground whitespace-pre-wrap font-sans">
+                  {r.content}
+                </pre>
+              ) : (
+                <ul className="space-y-1 text-sm">
+                  {(r.items ?? []).map((i) => (
+                    <li key={i.id}>
+                      <span className="text-primary font-mono">{i.item_id}</span> {i.content}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </CardContent>
           </Card>
         ))}

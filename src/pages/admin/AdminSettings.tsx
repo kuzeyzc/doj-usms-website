@@ -34,20 +34,18 @@ export default function AdminSettings() {
   });
 
   useEffect(() => {
-    setGeneral((settings as { general?: Record<string, string> }).general ?? {});
-    setMission((settings as { mission?: Record<string, string> }).mission ?? {});
-    setQuickLinks((settings as { quickLinks?: { title: string; subtitle: string } }).quickLinks ?? { title: "", subtitle: "" });
-    setFooter((settings as { footer?: Record<string, string> }).footer ?? {
-      contactTitle: "",
-      discordLabel: "",
-      discordText: "",
-      discordUrl: "",
-    });
-    setHeroStats((settings as { heroStats?: { agents_count: number; operations_count: number; founded_year: number } }).heroStats ?? {
-      agents_count: 42,
-      operations_count: 1847,
-      founded_year: 1789,
-    });
+    const s = settings as {
+      general?: Record<string, string>;
+      mission?: Record<string, string>;
+      quickLinks?: { title: string; subtitle: string };
+      footer?: Record<string, string>;
+      heroStats?: { agents_count: number; operations_count: number; founded_year: number };
+    };
+    setGeneral(s.general ?? {});
+    setMission(s.mission ?? {});
+    setQuickLinks(s.quickLinks ?? { title: "", subtitle: "" });
+    setFooter(s.footer ?? { contactTitle: "", discordLabel: "", discordText: "", discordUrl: "" });
+    setHeroStats(s.heroStats ?? { agents_count: 42, operations_count: 1847, founded_year: 1789 });
   }, [settings]);
 
   const saveGeneral = async () => {

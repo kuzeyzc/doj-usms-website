@@ -54,6 +54,8 @@ export default function AboutPage() {
 
         <SectionDivider />
 
+        <ChainOfCommand />
+
         <section className="py-24">
           <div className="container mx-auto px-4">
             <h2 className="font-heading text-xs uppercase tracking-section text-primary font-bold mb-4 text-center">
@@ -77,8 +79,6 @@ export default function AboutPage() {
             </div>
           </div>
         </section>
-
-        <ChainOfCommand />
       </main>
       <Footer />
     </div>

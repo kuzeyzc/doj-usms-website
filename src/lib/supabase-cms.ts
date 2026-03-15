@@ -1,7 +1,7 @@
 import { supabase } from "./supabase";
 
 export async function uploadGalleryImage(file: File): Promise<{ url: string } | { error: string }> {
-  if (!supabase) return { error: "Supabase yapılandırılmamış" };
+  if (!supabase) return { error: "Supabase not configured" };
   const ext = (file.name.split(".").pop()?.toLowerCase() || "png").replace(/[^a-z0-9]/g, "");
   const path = `gallery/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
   const { error } = await supabase.storage.from("gallery").upload(path, file, {
@@ -33,7 +33,9 @@ export interface ChainOfCommandItem {
 
 export interface RuleCategory {
   id: string;
-  category: string;
+  title?: string;
+  category?: string;
+  content?: string;
   sort_order: number;
   items?: { id: string; item_id: string; content: string }[];
 }
@@ -153,6 +155,15 @@ export async function deleteChainItem(id: string): Promise<boolean> {
   return !error;
 }
 
+export async function updateChainOrder(updates: { id: string; sort_order: number }[]): Promise<boolean> {
+  if (!supabase || !updates.length) return false;
+  for (const { id, sort_order } of updates) {
+    const { error } = await supabase.from("chain_of_command").update({ sort_order }).eq("id", id);
+    if (error) return false;
+  }
+  return true;
+}
+
 /** Kurallar */
 export async function fetchRules(): Promise<RuleCategory[]> {
   if (!supabase) return [];
@@ -165,10 +176,16 @@ export async function fetchRules(): Promise<RuleCategory[]> {
   })) as RuleCategory[];
 }
 
-export async function upsertRule(rule: Partial<RuleCategory>, items?: { item_id: string; content: string }[]): Promise<string | null> {
+export async function upsertRule(
+  rule: Partial<RuleCategory> & { title?: string; content?: string },
+  items?: { item_id: string; content: string }[]
+): Promise<string | null> {
   if (!supabase) return null;
-  const { id, ...rest } = rule as RuleCategory & { items?: unknown };
-  const { data: r, error: e1 } = await supabase.from("rules").upsert({ id, ...rest }).select("id").single();
+  const { id, items: _items, ...rest } = rule as RuleCategory & { items?: unknown };
+  const payload: Record<string, unknown> = { ...rest };
+  if (rule.title != null) payload.title = rule.title;
+  if (rule.content != null) payload.content = rule.content;
+  const { data: r, error: e1 } = await supabase.from("rules").upsert({ id, ...payload }).select("id").single();
   if (e1) return null;
   const rid = r?.id ?? id;
   if (items?.length && rid) {

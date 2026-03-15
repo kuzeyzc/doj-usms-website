@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
+import { motion } from "framer-motion";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import PageTransition from "./components/PageTransition";
+import SplashScreen from "./components/SplashScreen";
 import AdminLayout from "./layouts/AdminLayout";
+
 import Index from "./pages/Index.tsx";
 import AboutPage from "./pages/AboutPage.tsx";
 import RulesPage from "./pages/RulesPage.tsx";
@@ -26,12 +30,21 @@ import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="doj-marshals-theme">
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
+function AppContent() {
+  const [contentReady, setContentReady] = useState(false);
+
+  return (
+    <>
+      <SplashScreen onExitStart={() => setContentReady(true)} />
+      <motion.div
+        initial={false}
+        animate={{
+          filter: contentReady ? "blur(0px)" : "blur(12px)",
+          opacity: contentReady ? 1 : 0.7,
+        }}
+        transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+        className="min-h-screen"
+      >
         <BrowserRouter>
         <Routes>
           <Route element={<PageTransition />}>
@@ -57,6 +70,18 @@ const App = () => (
           </Route>
         </Routes>
       </BrowserRouter>
+      </motion.div>
+    </>
+  );
+}
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="doj-marshals-theme">
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AppContent />
     </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>

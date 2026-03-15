@@ -6,10 +6,18 @@ const DISCORD_WEBHOOK_DOCUMENTS =
   import.meta.env.VITE_DISCORD_WEBHOOK_DOCUMENTS ||
   "https://discord.com/api/webhooks/1482726349167788195/Czrs_6jXZyz8ZxlFyG_Gw59rNEefWIrb3D5zVHdAwzYyq41B3YpTmsfUbru69kdVH9qs";
 
+/** #site-başvuru kanalı - Yeni başvuru formu gönderildiğinde */
 const DISCORD_WEBHOOK_APPLICATIONS =
-  import.meta.env.VITE_DISCORD_WEBHOOK_APPLICATIONS || DISCORD_WEBHOOK_DOCUMENTS;
+  import.meta.env.VITE_DISCORD_WEBHOOK_APPLICATIONS ||
+  "https://discord.com/api/webhooks/1482457570487832617/i51liDGOHUU_zQsEMPdOUR9Bc5gDNJMzaNN0s-G_sj2GwnZmCyfB7XvnJ0yVcovjThcY";
+
+/** #başvuru-onay kanalı - Başvuru onaylandığında bildirim */
+const DISCORD_WEBHOOK_APPLICATIONS_APPROVED =
+  import.meta.env.VITE_DISCORD_WEBHOOK_APPLICATIONS_APPROVED ||
+  "https://discord.com/api/webhooks/1482746444975837274/R_U6_vfffEXjO7_Z9FJ7-mARcnVw5GxJtgZ9c3_G_FBvBhCFWEXOQrJ-iflPec_H-L1n";
 
 const DOJ_GOLD = 0xd4af37; // #D4AF37
+const GREEN = 0x00ff00; // #00FF00 - Onay rengi
 
 export interface DocumentWebhookPayload {
   title: string;
@@ -191,6 +199,54 @@ export async function sendApplicationToDiscord(
 
   try {
     const res = await fetch(DISCORD_WEBHOOK_APPLICATIONS, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+/** Discord ID sayısal mı? (15-22 haneli) - <@ID> ile etiketleme için */
+function isDiscordNumericId(value: string): boolean {
+  const trimmed = String(value || "").trim().replace(/\s/g, "");
+  return /^\d{15,22}$/.test(trimmed);
+}
+
+export interface ApplicationApprovalPayload {
+  name: string;
+  discord: string;
+}
+
+/**
+ * Başvuru onaylandığında #başvuru-onay kanalına bildirim gönderir.
+ * Discord ID sayısal ise <@ID> ile etiketler.
+ */
+export async function sendApplicationApprovalToDiscord(
+  payload: ApplicationApprovalPayload
+): Promise<boolean> {
+  const discordId = String(payload.discord || "").trim().replace(/\s/g, "");
+  const mention = isDiscordNumericId(discordId) ? `<@${discordId}>` : null;
+
+  const body: { content?: string; embeds: object[] } = {
+    embeds: [
+      {
+        title: "✅ Başvurunuz Onaylandı!",
+        description: `Sayın **${payload.name}**, USMS bünyesine yaptığınız başvuru titizlikle incelenmiş ve **ONAYLANMIŞTIR**. Tebrik ederiz!`,
+        color: GREEN,
+        footer: {
+          text: "Mülakat ve eğitim süreci için lütfen beklemede kalın.",
+        },
+        timestamp: new Date().toISOString(),
+      },
+    ],
+  };
+  if (mention) body.content = mention;
+
+  try {
+    const res = await fetch(DISCORD_WEBHOOK_APPLICATIONS_APPROVED, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

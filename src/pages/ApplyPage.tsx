@@ -20,7 +20,7 @@ const labelClass =
 const DEFAULT_PERSONAL: Record<string, FormPersonalField> = {
   name: { enabled: true, label: "İsim", placeholder: "Oyun içi isminiz" },
   age: { enabled: true, label: "Yaş", placeholder: "18+" },
-  discord: { enabled: true, label: "Discord Adı", placeholder: "kullanıcı#0000" },
+  discord: { enabled: true, label: "Discord ID", placeholder: "Discord'da sağ tık > ID'yi Kopyala (17-19 haneli sayı)" },
   hexId: { enabled: true, label: "Hex ID", placeholder: "Steam/FiveM ID" },
 };
 

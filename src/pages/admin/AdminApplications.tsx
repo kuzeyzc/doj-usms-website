@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,22 +19,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { fetchApplications, fetchFormScenarioQuestions, updateApplicationStatus } from "@/lib/supabase-cms";
+import { sendApplicationApprovalToDiscord } from "@/lib/discord-webhook";
 import { isSupabaseEnabled } from "@/lib/supabase";
 import { useState } from "react";
 import { FileText, X, CheckCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
 import type { Application, FormScenarioQuestion } from "@/lib/supabase-cms";
 
-const STATUS_LABELS: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  pending: { label: "Beklemede", variant: "secondary" },
-  approved: { label: "Onaylandı", variant: "default" },
-  rejected: { label: "Reddedildi", variant: "destructive" },
-};
-
 function StatusBadge({ status }: { status?: string }) {
+  const { t } = useTranslation();
   const s = status || "pending";
-  const { label, variant } = STATUS_LABELS[s] ?? STATUS_LABELS.pending;
-  return <Badge variant={variant}>{label}</Badge>;
+  const labels: Record<string, { labelKey: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+    pending: { labelKey: "admin.applications.statusPending", variant: "secondary" },
+    approved: { labelKey: "admin.applications.statusApproved", variant: "default" },
+    rejected: { labelKey: "admin.applications.statusRejected", variant: "destructive" },
+  };
+  const { labelKey, variant } = labels[s] ?? labels.pending;
+  return <Badge variant={variant}>{t(labelKey)}</Badge>;
 }
 
 function ApplicationFileView({
@@ -47,6 +49,7 @@ function ApplicationFileView({
   onClose: () => void;
   onStatusChange: () => void;
 }) {
+  const { t } = useTranslation();
   const answers = app.scenario_answers ?? {};
   const hasLegacyScenario = app.scenario && !Object.keys(answers).length;
 
@@ -54,8 +57,12 @@ function ApplicationFileView({
     const ok = await updateApplicationStatus(app.id, newStatus);
     if (ok) {
       onStatusChange();
-      toast.success("Durum güncellendi.");
-    } else toast.error("Güncelleme başarısız.");
+      toast.success(t("admin.applications.statusUpdated"));
+      if (newStatus === "approved") {
+        const sent = await sendApplicationApprovalToDiscord({ name: app.name, discord: app.discord });
+        if (!sent) toast.error(t("admin.applications.discordNotifyFailed"));
+      }
+    } else toast.error(t("admin.applications.updateFailed"));
   };
 
   return (
@@ -64,7 +71,7 @@ function ApplicationFileView({
         <CardHeader className="flex flex-row items-center justify-between border-b border-primary/10 bg-surface/50">
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-primary" />
-            <CardTitle className="text-lg">Başvuru Dosyası — {app.name}</CardTitle>
+            <CardTitle className="text-lg">{t("admin.applications.fileTitle")} — {app.name}</CardTitle>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="w-4 h-4" />
@@ -81,41 +88,41 @@ function ApplicationFileView({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="pending">Beklemede</SelectItem>
-                <SelectItem value="approved">Onaylandı</SelectItem>
-                <SelectItem value="rejected">Reddedildi</SelectItem>
+                <SelectItem value="pending">{t("admin.applications.statusPending")}</SelectItem>
+                <SelectItem value="approved">{t("admin.applications.statusApproved")}</SelectItem>
+                <SelectItem value="rejected">{t("admin.applications.statusRejected")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div>
             <h4 className="font-heading text-xs uppercase tracking-section text-primary font-semibold mb-2">
-              Kişisel Bilgiler
+              {t("admin.applications.personalInfo")}
             </h4>
             <dl className="grid grid-cols-2 gap-2 text-sm">
-              <dt className="text-muted-foreground">İsim</dt>
+              <dt className="text-muted-foreground">{t("admin.applications.nameIcOoc")}</dt>
               <dd>{app.name}</dd>
-              <dt className="text-muted-foreground">Discord</dt>
+              <dt className="text-muted-foreground">{t("admin.applications.discordName")}</dt>
               <dd>{app.discord}</dd>
-              <dt className="text-muted-foreground">FiveM / Hex ID</dt>
+              <dt className="text-muted-foreground">{t("admin.applications.discordId")}</dt>
               <dd>{app.fivem_id}</dd>
-              <dt className="text-muted-foreground">Yaş</dt>
+              <dt className="text-muted-foreground">{t("admin.applications.age")}</dt>
               <dd>{app.age}</dd>
-              <dt className="text-muted-foreground">Deneyim</dt>
+              <dt className="text-muted-foreground">{t("admin.applications.experience")}</dt>
               <dd>{app.experience || "—"}</dd>
             </dl>
           </div>
 
           <div>
             <h4 className="font-heading text-xs uppercase tracking-section text-primary font-semibold mb-2">
-              Motivasyon
+              {t("admin.applications.motivation")}
             </h4>
             <p className="text-sm whitespace-pre-wrap">{app.reason}</p>
           </div>
 
           <div>
             <h4 className="font-heading text-xs uppercase tracking-section text-primary font-semibold mb-2">
-              Senaryo Cevapları
+              {t("admin.applications.scenarioAnswers")}
             </h4>
             {hasLegacyScenario ? (
               <p className="text-sm whitespace-pre-wrap">{app.scenario}</p>
@@ -128,7 +135,7 @@ function ApplicationFileView({
                   return (
                     <div key={qId} className="p-3 bg-surface/50 rounded-lg">
                       <p className="text-xs text-muted-foreground mb-1">
-                        {q ? q.question_text : `Soru (arşiv)`}
+                        {q ? q.question_text : t("admin.applications.questionArchived")}
                       </p>
                       <p className="text-sm whitespace-pre-wrap">{ans}</p>
                     </div>
@@ -139,7 +146,7 @@ function ApplicationFileView({
           </div>
 
           <p className="text-xs text-muted-foreground">
-            Başvuru tarihi: {new Date(app.created_at).toLocaleString("tr-TR")}
+            {t("admin.applications.applicationDate")}: {new Date(app.created_at).toLocaleString("tr-TR")}
           </p>
         </CardContent>
       </Card>
@@ -148,6 +155,7 @@ function ApplicationFileView({
 }
 
 export default function AdminApplications() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
 
@@ -166,29 +174,29 @@ export default function AdminApplications() {
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["applications"] });
 
   if (!isSupabaseEnabled) {
-    return <div className="p-4 bg-muted/30 rounded-lg">Supabase yapılandırılmamış.</div>;
+    return <div className="p-4 bg-muted/30 rounded-lg">{t("admin.supabaseRequired")}</div>;
   }
 
   return (
     <div>
-      <h1 className="font-heading text-2xl font-bold mb-6">Gelen Başvurular</h1>
+      <h1 className="font-heading text-2xl font-bold mb-6">{t("admin.applications.title")}</h1>
       <Card className="border-primary/15">
         <CardHeader>
-          <CardTitle>Başvuru Listesi ({applications.length})</CardTitle>
+          <CardTitle>{t("admin.applications.listTitle")} ({applications.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {applications.length === 0 ? (
-            <p className="text-muted-foreground">Henüz başvuru yok.</p>
+            <p className="text-muted-foreground">{t("admin.applications.empty")}</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>İsim</TableHead>
-                  <TableHead>Discord</TableHead>
-                  <TableHead>FiveM ID</TableHead>
-                  <TableHead>Yaş</TableHead>
-                  <TableHead>Durum</TableHead>
-                  <TableHead>Tarih</TableHead>
+                  <TableHead>{t("admin.applications.name")}</TableHead>
+                  <TableHead>{t("admin.applications.discord")}</TableHead>
+                  <TableHead>{t("admin.applications.fivemId")}</TableHead>
+                  <TableHead>{t("admin.applications.age")}</TableHead>
+                  <TableHead>{t("admin.applications.status")}</TableHead>
+                  <TableHead>{t("admin.applications.date")}</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
@@ -209,7 +217,7 @@ export default function AdminApplications() {
                     <TableCell>{new Date(a.created_at).toLocaleDateString("tr-TR")}</TableCell>
                     <TableCell>
                       <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); setSelectedApp(a); }}>
-                        Dosyayı Aç
+                        {t("admin.applications.openFile")}
                       </Button>
                     </TableCell>
                   </TableRow>
