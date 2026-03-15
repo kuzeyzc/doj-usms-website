@@ -16,12 +16,24 @@
     "title3": "SERVICE.",
     "subtitle": "United States Marshals Service is the premier federal law enforcement unit in the San Andreas region. We serve justice and order.",
     "rulesBtn": "Read Rules",
-    "applyBtn": "Apply"
-  },
-  "hero.stats": {
-    "agents": "Active Agents",
-    "operations": "Successful Operations",
-    "founded": "Established"
+    "applyBtn": "Apply",
+    "stats": {
+      "agents": "Active People",
+      "operations": "Successful Operations",
+      "founded": "Year Established"
+    },
+    "discordCard": {
+      "title": "Join Our Discord Server",
+      "members": "members online",
+      "joinBtn": "JOIN SERVER"
+    },
+    "discordActivity": {
+      "basSavci": "Attorney General",
+      "basSavciSuffix": "Active",
+      "usms": "USMS",
+      "usmsSuffix": "On Patrol",
+      "inactive": "Inactive"
+    }
   },
   "quickLinks": {
     "title": "Quick Access",
@@ -29,7 +41,7 @@
     "rules": { "title": "Rules", "desc": "Unit rules and procedures" },
     "documents": { "title": "Documents", "desc": "SOPs and training materials" },
     "apply": { "title": "Apply", "desc": "Join the US Marshal roster" },
-    "announcements": { "title": "Announcements", "desc": "Latest news and updates" }
+    "gallery": { "title": "Gallery", "desc": "Unit photos and event images" }
   },
   "mission": {
     "label": "Our Mission",

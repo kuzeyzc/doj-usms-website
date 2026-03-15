@@ -6,6 +6,7 @@ import {
   fetchRules,
   fetchFaq,
   fetchGallery,
+  fetchServerStats,
 } from "@/lib/supabase-cms";
 import { isSupabaseEnabled } from "@/lib/supabase";
 import type { SiteSettings, ChainOfCommandItem, RuleCategory, FaqItem, GalleryItem } from "@/lib/supabase-cms";
@@ -13,7 +14,7 @@ import type { SiteSettings, ChainOfCommandItem, RuleCategory, FaqItem, GalleryIt
 /** Site ayarları - DB varsa oradan, yoksa i18n fallback */
 export function useSiteSettings() {
   const { t, i18n } = useTranslation();
-  const { data: db } = useQuery({
+  const { data: db, isLoading: settingsLoading } = useQuery({
     queryKey: ["siteSettings"],
     queryFn: fetchSiteSettings,
     enabled: isSupabaseEnabled,
@@ -58,7 +59,13 @@ export function useSiteSettings() {
     discordUrl: "https://discord.gg/usmarshals",
   };
 
-  return { general, values, mission, quickLinks, footer };
+  const heroStats = db?.heroStats ?? {
+    agents_count: 42,
+    operations_count: 1847,
+    founded_year: 1789,
+  };
+
+  return { general, values, mission, quickLinks, footer, heroStats, settingsLoading };
 }
 
 export function useChainOfCommandData() {
@@ -134,4 +141,18 @@ export function useGalleryData() {
     enabled: isSupabaseEnabled,
   });
   return db;
+}
+
+/** server_stats: savci_count, usms_count (Başsavcı/USMS aktiflik sayaçları) */
+export function useServerStats() {
+  const { data, isLoading } = useQuery({
+    queryKey: ["serverStats"],
+    queryFn: fetchServerStats,
+    enabled: isSupabaseEnabled,
+  });
+  return {
+    savci_count: data?.savci_count ?? 0,
+    usms_count: data?.usms_count ?? 0,
+    isLoading,
+  };
 }

@@ -20,13 +20,13 @@ export const isSupabaseEnabled = !!supabase;
 
 const BUCKET = "documents";
 
-/** Belgeler tablosundan tüm kayıtları çeker */
+/** Belgeler tablosundan tüm kayıtları çeker (en son eklenen en üstte) */
 export async function fetchDocuments(): Promise<DocumentRecord[]> {
   if (!supabase) return [];
   const { data, error } = await supabase
     .from("documents")
     .select("*")
-    .order("date", { ascending: false });
+    .order("created_at", { ascending: false });
   if (error) {
     console.error("Supabase fetch error:", error);
     return [];
@@ -82,16 +82,36 @@ const MIME_MAP: Record<string, string> = {
   png: "image/png",
   jpg: "image/jpeg",
   jpeg: "image/jpeg",
+  svg: "image/svg+xml",
+  webp: "image/webp",
 };
 
-/** Storage'a dosya yükle, public URL döner. Hata durumunda { error: string } döner */
+const ALLOWED_EXT = ["pdf", "png", "jpg", "jpeg", "svg", "webp"] as const;
+
+function getFileType(ext: string): "pdf" | "png" {
+  if (ext === "pdf") return "pdf";
+  return "png";
+}
+
+/** Storage path: YYYY/MM/filename (bucket: documents) */
+function getStoragePath(file: File): string {
+  const ext = (file.name.split(".").pop()?.toLowerCase() || "pdf").replace(/[^a-z0-9]/g, "");
+  const safeExt = ALLOWED_EXT.includes(ext as (typeof ALLOWED_EXT)[number]) ? ext : "pdf";
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const safeName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${safeExt}`;
+  return `${y}/${m}/${safeName}`;
+}
+
+/** Storage'a tek dosya yükle, public URL döner. Hata durumunda { error: string } döner */
 export async function uploadDocumentFile(
   file: File
-): Promise<{ url: string } | { error: string }> {
+): Promise<{ url: string; fileType: "pdf" | "png" } | { error: string }> {
   if (!supabase) return { error: "Supabase yapılandırılmamış" };
   const ext = (file.name.split(".").pop()?.toLowerCase() || "pdf").replace(/[^a-z0-9]/g, "");
-  const safeExt = ["pdf", "png", "jpg", "jpeg"].includes(ext) ? ext : "pdf";
-  const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${safeExt}`;
+  const safeExt = ALLOWED_EXT.includes(ext as (typeof ALLOWED_EXT)[number]) ? ext : "pdf";
+  const path = getStoragePath(file);
   const contentType = file.type || MIME_MAP[safeExt] || "application/octet-stream";
 
   const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
@@ -105,5 +125,43 @@ export async function uploadDocumentFile(
     return { error: msg || error.message };
   }
   const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-  return { url: data.publicUrl };
+  return { url: data.publicUrl, fileType: getFileType(safeExt) };
+}
+
+export interface BatchUploadResult {
+  success: { file: File; url: string; fileType: "pdf" | "png" }[];
+  failed: { file: File; error: string }[];
+}
+
+/** Toplu dosya yükleme - documents/YYYY/MM/ path yapısı */
+export async function uploadDocumentFilesBatch(
+  files: File[]
+): Promise<BatchUploadResult> {
+  const result: BatchUploadResult = { success: [], failed: [] };
+  if (!supabase) {
+    result.failed = files.map((f) => ({ file: f, error: "Supabase yapılandırılmamış" }));
+    return result;
+  }
+
+  for (const file of files) {
+    const ext = (file.name.split(".").pop()?.toLowerCase() || "pdf").replace(/[^a-z0-9]/g, "");
+    const safeExt = ALLOWED_EXT.includes(ext as (typeof ALLOWED_EXT)[number]) ? ext : "pdf";
+    const path = getStoragePath(file);
+    const contentType = file.type || MIME_MAP[safeExt] || "application/octet-stream";
+
+    const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
+      cacheControl: "3600",
+      upsert: true,
+      contentType,
+    });
+
+    if (error) {
+      const msg = (error as { error?: string; message?: string }).error || error.message;
+      result.failed.push({ file, error: msg || error.message });
+    } else {
+      const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
+      result.success.push({ file, url: data.publicUrl, fileType: getFileType(safeExt) });
+    }
+  }
+  return result;
 }

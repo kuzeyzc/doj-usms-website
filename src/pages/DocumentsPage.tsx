@@ -13,11 +13,11 @@ import {
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useDocuments } from "@/hooks/useDocuments";
-import PdfViewerModal from "@/components/PdfViewerModal";
-import ImagePreviewModal from "@/components/ImagePreviewModal";
+import DocumentPreviewModal from "@/components/DocumentPreviewModal";
 import type { DocumentRecord } from "@/types/document";
 import { format } from "date-fns";
 import { tr, enUS } from "date-fns/locale";
+import { formatTime } from "@/lib/utils";
 
 const CATEGORIES: { key: "all" | DocumentRecord["category"]; labelKey: string; icon: typeof FileText }[] = [
   { key: "all", labelKey: "documents.filterAll", icon: FileText },
@@ -69,10 +69,45 @@ export default function DocumentsPage() {
 
   const dateLocale = i18n.language === "tr" ? tr : enUS;
 
+  /** created_at'e göre gün bazında gruplandırma (en yeni gün en üstte, aynı gün içinde en yeni en üstte) */
+  const groupedByDate = useMemo(() => {
+    const groups = new Map<string, { dateLabel: string; docs: DocumentRecord[] }>();
+    const sorted = [...filtered].sort((a, b) => {
+      const ta = a.created_at ? new Date(a.created_at).getTime() : new Date(a.date).getTime();
+      const tb = b.created_at ? new Date(b.created_at).getTime() : new Date(b.date).getTime();
+      return tb - ta;
+    });
+    for (const doc of sorted) {
+      const d = doc.created_at ? new Date(doc.created_at) : new Date(doc.date);
+      const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      const dateLabel = format(d, "d MMMM yyyy", { locale: dateLocale });
+      if (!groups.has(dateKey)) {
+        groups.set(dateKey, { dateLabel, docs: [] });
+      }
+      groups.get(dateKey)!.docs.push(doc);
+    }
+    return Array.from(groups.entries()).map(([dateKey, { dateLabel, docs }]) => ({
+      dateKey,
+      dateLabel,
+      docs,
+    }));
+  }, [filtered, dateLocale]);
+
   const resolveUrl = (url: string) => {
     if (url.startsWith("http")) return url;
     const base = import.meta.env.BASE_URL.replace(/\/$/, "");
     return `${window.location.origin}${base}${url.startsWith("/") ? url : "/" + url}`;
+  };
+
+  const isImageUrl = (url: string, fileType: string) => {
+    if (fileType === "png") return true;
+    const ext = url.split(".").pop()?.toLowerCase();
+    return ["png", "jpg", "jpeg", "svg", "webp", "gif"].includes(ext ?? "");
+  };
+
+  const getDocUrls = (doc: DocumentRecord): string[] => {
+    if (doc.file_urls && doc.file_urls.length > 0) return doc.file_urls;
+    return [doc.file_url];
   };
 
   return (
@@ -148,66 +183,97 @@ export default function DocumentsPage() {
                 {t("documents.noResults")}
               </motion.p>
             ) : (
-              <div className="space-y-4">
-                {filtered.map((doc, i) => (
-                  <motion.div
-                    key={doc.id}
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.04 }}
-                    className="gold-border-top flex flex-col sm:flex-row sm:items-center gap-4 bg-surface-elevated rounded-lg p-5 border border-primary/10 hover:border-primary/25 transition-colors"
-                  >
-                    <div className="flex items-start gap-4 flex-1 min-w-0">
-                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        {doc.file_type === "pdf" ? (
-                          <FileText className="w-6 h-6 text-primary" />
-                        ) : (
-                          <FileText className="w-6 h-6 text-primary" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex flex-wrap items-center gap-2 mb-1">
-                          <h4 className="font-heading font-semibold text-foreground">
-                            {doc.title}
-                          </h4>
-                          <span className="text-[10px] uppercase tracking-section font-heading text-primary bg-primary/10 px-2 py-0.5 rounded-sm">
-                            {t(getCategoryLabelKey(doc.category))}
-                          </span>
-                        </div>
-                        {doc.description && (
-                          <p className="text-sm text-muted-foreground font-body line-clamp-1">
-                            {doc.description}
-                          </p>
-                        )}
-                        <p className="text-xs text-muted-foreground/80 mt-1">
-                          {format(new Date(doc.date), "d MMMM yyyy", { locale: dateLocale })}
-                        </p>
-                      </div>
+              <div className="space-y-8">
+                {groupedByDate.map((group, groupIdx) => (
+                  <div key={group.dateKey} className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm font-heading font-semibold text-primary bg-primary/10 px-3 py-1.5 rounded shrink-0">
+                        {group.dateLabel}
+                      </span>
+                      <div className="flex-1 h-px bg-primary/20" />
                     </div>
-                    <div className="flex gap-2 sm:flex-shrink-0">
-                      <motion.button
-                        onClick={() => setPreviewDoc(doc)}
-                        className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary font-heading text-sm font-semibold rounded-sm hover:bg-primary/20 transition-colors"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <Eye className="w-4 h-4" />
-                        {t("documents.view")}
-                      </motion.button>
-                      <motion.a
-                        href={resolveUrl(doc.file_url)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        download
-                        className="flex items-center gap-2 px-4 py-2 border border-primary/30 text-foreground font-heading text-sm font-semibold rounded-sm hover:bg-primary/5 transition-colors"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <Download className="w-4 h-4" />
-                        {t("documents.download")}
-                      </motion.a>
+                    <div className="space-y-4">
+                      {group.docs.map((doc, i) => (
+                        <motion.div
+                          key={doc.id}
+                          initial={{ opacity: 0, y: 16 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: (groupIdx * 10 + i) * 0.03 }}
+                          className="gold-border-top flex flex-col sm:flex-row sm:items-center gap-4 bg-surface-elevated rounded-lg p-5 border border-primary/10 hover:border-primary/25 transition-colors"
+                        >
+                          <div className="flex items-start gap-4 flex-1 min-w-0">
+                            <div className="w-20 h-24 rounded-lg overflow-hidden bg-primary/5 flex-shrink-0 border border-primary/10 flex items-center justify-center relative">
+                              {isImageUrl(getDocUrls(doc)[0], doc.file_type) ? (
+                                <>
+                                  <img
+                                    src={resolveUrl(getDocUrls(doc)[0])}
+                                    alt=""
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                      const el = e.target as HTMLImageElement;
+                                      el.style.display = "none";
+                                      el.nextElementSibling?.classList.remove("hidden");
+                                    }}
+                                  />
+                                  <div className="hidden absolute inset-0 flex items-center justify-center bg-primary/5">
+                                    <FileText className="w-8 h-8 text-primary" />
+                                  </div>
+                                </>
+                              ) : (
+                                <FileText className="w-8 h-8 text-primary" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-wrap items-center gap-2 mb-1">
+                                <h4 className="font-heading font-semibold text-foreground">
+                                  {doc.title}
+                                </h4>
+                                <span className="text-[10px] uppercase tracking-section font-heading text-primary bg-primary/10 px-2 py-0.5 rounded-sm">
+                                  {t(getCategoryLabelKey(doc.category))}
+                                </span>
+                              </div>
+                              {doc.description && (
+                                <p className="text-sm text-muted-foreground font-body line-clamp-1">
+                                  {doc.description}
+                                </p>
+                              )}
+                              <div className="mt-1 text-xs">
+                                <p>{format(new Date(doc.date), "d MMMM yyyy", { locale: dateLocale })}</p>
+                                {doc.created_at && (
+                                  <p className="text-muted-foreground text-[11px] mt-0.5">
+                                    {formatTime(doc.created_at)}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 sm:flex-shrink-0">
+                            <motion.button
+                              onClick={() => setPreviewDoc(doc)}
+                              className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary font-heading text-sm font-semibold rounded-sm hover:bg-primary/20 transition-colors"
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                            >
+                              <Eye className="w-4 h-4" />
+                              {t("documents.view")}
+                            </motion.button>
+                            <motion.a
+                              href={resolveUrl(getDocUrls(doc)[0])}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download
+                              className="flex items-center gap-2 px-4 py-2 border border-primary/30 text-foreground font-heading text-sm font-semibold rounded-sm hover:bg-primary/5 transition-colors"
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                            >
+                              <Download className="w-4 h-4" />
+                              {t("documents.download")}
+                            </motion.a>
+                          </div>
+                        </motion.div>
+                      ))}
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             )}
@@ -216,21 +282,14 @@ export default function DocumentsPage() {
       </main>
       <Footer />
 
-      {/* Preview modals */}
-      {previewDoc && previewDoc.file_type === "pdf" && (
-        <PdfViewerModal
+      {/* Preview modal - tek veya çoklu sayfa */}
+      {previewDoc && (
+        <DocumentPreviewModal
           open={!!previewDoc}
           onOpenChange={(open) => !open && setPreviewDoc(null)}
-          url={resolveUrl(previewDoc.file_url)}
+          urls={getDocUrls(previewDoc)}
           title={previewDoc.title}
-        />
-      )}
-      {previewDoc && previewDoc.file_type === "png" && (
-        <ImagePreviewModal
-          open={!!previewDoc}
-          onOpenChange={(open) => !open && setPreviewDoc(null)}
-          url={resolveUrl(previewDoc.file_url)}
-          title={previewDoc.title}
+          resolveUrl={resolveUrl}
         />
       )}
     </div>

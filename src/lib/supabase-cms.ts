@@ -20,6 +20,7 @@ export interface SiteSettings {
   mission?: Record<string, string>;
   quickLinks?: { title: string; subtitle: string };
   footer?: { contactTitle: string; discordLabel: string; discordText: string; discordUrl: string };
+  heroStats?: { agents_count: number; operations_count: number; founded_year: number };
 }
 
 export interface ChainOfCommandItem {
@@ -87,6 +88,29 @@ export interface FormScenarioQuestion {
   question_text: string;
   min_chars: number;
   sort_order: number;
+}
+
+export interface ServerStats {
+  savci_count: number;
+  usms_count: number;
+}
+
+/** server_stats tablosundan savci_count ve usms_count çeker */
+export async function fetchServerStats(): Promise<ServerStats> {
+  if (!supabase) return { savci_count: 0, usms_count: 0 };
+  const { data, error } = await supabase
+    .from("server_stats")
+    .select("savci_count, usms_count")
+    .limit(1)
+    .maybeSingle();
+  if (error) {
+    console.error("fetchServerStats error:", error);
+    return { savci_count: 0, usms_count: 0 };
+  }
+  return {
+    savci_count: data?.savci_count ?? 0,
+    usms_count: data?.usms_count ?? 0,
+  };
 }
 
 /** Site ayarlarını çek */

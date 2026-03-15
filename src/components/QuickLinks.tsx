@@ -1,14 +1,14 @@
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { BookOpen, FileText, UserPlus, Bell } from "lucide-react";
+import { BookOpen, FileText, UserPlus, Images } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteData";
 
 const linkKeys = [
   { icon: BookOpen, key: "rules", path: "/rules" },
   { icon: FileText, key: "documents", path: "/documents" },
   { icon: UserPlus, key: "apply", path: "/apply" },
-  { icon: Bell, key: "announcements", path: "/faq" },
+  { icon: Images, key: "gallery", path: "/gallery" },
 ] as const;
 
 export default function QuickLinks() {

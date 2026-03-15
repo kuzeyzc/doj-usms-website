@@ -13,6 +13,7 @@ export interface DocumentRecord {
   category: DocumentCategory;
   date: string;  // YYYY-MM-DD
   file_url: string;
+  file_urls?: string[];  // Çoklu sayfa - birden fazla görsel/PDF
   file_type: "pdf" | "png";
   description?: string;
   created_at?: string;

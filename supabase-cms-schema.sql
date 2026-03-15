@@ -14,7 +14,8 @@ insert into site_settings (key, value) values
   ('values', '{"justice":{"title":"Dürüstlük","text":"Görevlerimizi en yüksek etik standartlarda ve şeffaflıkla yerine getiririz. Her kararımız hesap verebilir olmalıdır."},"integrity":{"title":"Sadakat","text":"Birime, yasalara ve adalet ilkelerine bağlılık temel taahhütümüzdür. Federal hukukun uygulanmasında taviz vermeyiz."},"service":{"title":"Cesaret & Tarafsızlık","text":"Zorlu koşullarda kararlılık ve cesaret sergileriz. Tüm işlemlerimizde tarafsızlık ve objektiflik esastır."}}'),
   ('mission', '{"label":"Misyonumuz","title":"Federal Hukuk Uygulama","p1":"San Andreas genelinde adaleti tesis etmek ve federal yasaları tavizsiz uygulamak.","p2":"Birim olarak, yüksek standartlarda profesyonellik, adalet ve toplum güvenliği ilkeleriyle hareket ediyoruz.","p3":"Kadromuza katılmak, sadece bir unvan değil; bir sorumluluk ve onurdur."}'),
   ('quickLinks', '{"title":"Hızlı Erişim","subtitle":"İhtiyacınız Olan Her Şey"}'),
-  ('footer', '{"contactTitle":"İletişim","discordLabel":"Discord Sunucusu","discordText":"discord.gg/usmarshals","discordUrl":"https://discord.gg/usmarshals"}')
+  ('footer', '{"contactTitle":"İletişim","discordLabel":"Discord Sunucusu","discordText":"discord.gg/usmarshals","discordUrl":"https://discord.gg/usmarshals"}'),
+  ('heroStats', '{"agents_count":42,"operations_count":1847,"founded_year":1789}')
 on conflict (key) do nothing;
 
 alter table site_settings enable row level security;

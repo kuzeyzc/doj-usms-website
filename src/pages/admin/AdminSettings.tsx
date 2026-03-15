@@ -27,6 +27,11 @@ export default function AdminSettings() {
     discordText: "",
     discordUrl: "",
   });
+  const [heroStats, setHeroStats] = useState({
+    agents_count: 42,
+    operations_count: 1847,
+    founded_year: 1789,
+  });
 
   useEffect(() => {
     setGeneral((settings as { general?: Record<string, string> }).general ?? {});
@@ -37,6 +42,11 @@ export default function AdminSettings() {
       discordLabel: "",
       discordText: "",
       discordUrl: "",
+    });
+    setHeroStats((settings as { heroStats?: { agents_count: number; operations_count: number; founded_year: number } }).heroStats ?? {
+      agents_count: 42,
+      operations_count: 1847,
+      founded_year: 1789,
     });
   }, [settings]);
 
@@ -69,6 +79,14 @@ export default function AdminSettings() {
     if (ok) {
       queryClient.invalidateQueries({ queryKey: ["siteSettings"] });
       toast.success("Footer ayarları kaydedildi.");
+    } else toast.error("Kaydetme başarısız.");
+  };
+
+  const saveHeroStats = async () => {
+    const ok = await updateSiteSetting("heroStats", heroStats);
+    if (ok) {
+      queryClient.invalidateQueries({ queryKey: ["siteSettings"] });
+      toast.success("Anasayfa istatistikleri kaydedildi.");
     } else toast.error("Kaydetme başarısız.");
   };
 
@@ -174,6 +192,50 @@ export default function AdminSettings() {
           <Field preview="Misyon P2" label="Paragraf 2" value={mission.p2 ?? ""} onChange={(v) => setMission((m) => ({ ...m, p2: v }))} textarea />
           <Field preview="Misyon P3" label="Paragraf 3" value={mission.p3 ?? ""} onChange={(v) => setMission((m) => ({ ...m, p3: v }))} textarea />
           <Button onClick={saveMission} disabled={isLoading}>
+            Kaydet
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Anasayfa İstatistikleri */}
+      <Card className="border-primary/15 mb-6">
+        <CardHeader>
+          <CardTitle>Anasayfa İstatistikleri</CardTitle>
+          <p className="text-sm text-muted-foreground">Hero bölümündeki sayısal değerler (Aktif Ajanlar, Operasyonlar, Kuruluş yılı).</p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label>Agents (Aktif Ajanlar)</Label>
+            <Input
+              type="number"
+              min={0}
+              value={heroStats.agents_count}
+              onChange={(e) => setHeroStats((h) => ({ ...h, agents_count: parseInt(e.target.value) || 0 }))}
+              className="input-glow"
+            />
+          </div>
+          <div>
+            <Label>Operations (Başarılı Operasyon)</Label>
+            <Input
+              type="number"
+              min={0}
+              value={heroStats.operations_count}
+              onChange={(e) => setHeroStats((h) => ({ ...h, operations_count: parseInt(e.target.value) || 0 }))}
+              className="input-glow"
+            />
+          </div>
+          <div>
+            <Label>Founded (Kuruluş Yılı)</Label>
+            <Input
+              type="number"
+              min={1700}
+              max={2100}
+              value={heroStats.founded_year}
+              onChange={(e) => setHeroStats((h) => ({ ...h, founded_year: parseInt(e.target.value) || 1789 }))}
+              className="input-glow"
+            />
+          </div>
+          <Button onClick={saveHeroStats} disabled={isLoading}>
             Kaydet
           </Button>
         </CardContent>

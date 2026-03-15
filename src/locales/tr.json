@@ -16,20 +16,32 @@
     "title3": "SERVICE.",
     "subtitle": "United States Marshals Service, San Andreas Bölgesi'nin en köklü federal yasa uygulama birimidir. Adalet ve düzen için görev yapıyoruz.",
     "rulesBtn": "Kuralları Oku",
-    "applyBtn": "Başvur"
-  },
-  "hero.stats": {
-    "agents": "Aktif Ajanlar",
-    "operations": "Başarılı Operasyon",
-    "founded": "Kuruluş"
+    "applyBtn": "Başvur",
+    "stats": {
+      "agents": "Aktif Kişiler",
+      "operations": "Başarılı Operasyonlar",
+      "founded": "Kuruluş Yılı"
+    },
+    "discordCard": {
+      "title": "Discord Sunucumuza Katılın",
+      "members": "üye çevrimiçi",
+      "joinBtn": "SUNUCUYA KATIL"
+    },
+    "discordActivity": {
+      "basSavci": "Başsavcı",
+      "basSavciSuffix": "Aktif",
+      "usms": "USMS",
+      "usmsSuffix": "Devriyede",
+      "inactive": "Pasif"
+    }
   },
   "quickLinks": {
     "title": "Hızlı Erişim",
     "subtitle": "İhtiyacınız Olan Her Şey",
     "rules": { "title": "Kurallar", "desc": "Birim kuralları ve prosedürleri" },
-    "documents": { "title": "Belgeler", "desc": "SOP ve eğitim materyalleri" },
+    "documents": { "title": "Belgeler", "desc": "Aktif paylaşılan belgeler" },
     "apply": { "title": "Başvuru", "desc": "US Marshal kadrosuna katıl" },
-    "announcements": { "title": "Duyurular", "desc": "Son haberler ve güncellemeler" }
+    "gallery": { "title": "Galeri", "desc": "Birim fotoğrafları ve etkinlik görselleri" }
   },
   "mission": {
     "label": "Misyonumuz",

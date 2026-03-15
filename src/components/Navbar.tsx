@@ -50,7 +50,16 @@ export default function Navbar() {
       }`}
     >
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
-        <Link to="/" className="flex items-center gap-2">
+        <Link
+          to="/"
+          onClick={(e) => {
+            if (pathname === "/") {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+          }}
+          className="flex items-center gap-2 cursor-pointer"
+        >
           <Shield className="w-6 h-6 text-primary" />
           <span className="font-heading font-bold text-foreground tracking-tight-heading text-lg">
             {general?.siteName ?? t("nav.brand")}
