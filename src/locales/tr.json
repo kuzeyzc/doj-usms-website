@@ -165,8 +165,8 @@
     "intro": "U.S. Marshals Service kadrosuna katılmak için aşağıdaki formu eksiksiz doldurun. Başvurunuz komuta zincirimiz tarafından değerlendirilecektir.",
     "prereq": "Ön Koşullar",
     "prereq1": "Discord sunucumuzda aktif üye olmalısınız",
-    "prereq2": "Minimum 18 yaşında olmalısınız",
-    "prereq3": "Sunucuda en az 2 haftalık deneyiminiz olmalıdır",
+    "prereq2": "Minimum 20 yaşında olmalısınız",
+    "prereq3": "Sunucuda en az 1 haftalık deneyiminiz olmalıdır",
     "prereq4": "Aktif cezai işlem kaydınız olmamalıdır",
     "fields": {
       "name": "İsim *",
