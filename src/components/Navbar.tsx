@@ -14,6 +14,7 @@ const navKeys = [
   { key: "gallery", path: "/gallery" },
   { key: "faq", path: "/faq" },
   { key: "apply", path: "/apply" },
+  { key: "warrant", path: "/warrant" },
 ] as const;
 
 export default function Navbar() {

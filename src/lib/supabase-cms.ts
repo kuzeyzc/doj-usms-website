@@ -320,3 +320,73 @@ export async function reorderFormScenarioQuestions(ids: string[]): Promise<boole
   }
   return true;
 }
+
+/** Adli Talepler (Warrants) */
+export type WarrantRequestType = "Raid" | "Search" | "Surveillance" | "Other";
+export type WarrantStatus = "Pending" | "Approved" | "Denied";
+
+export interface Warrant {
+  id: string;
+  applicant_name: string;
+  department: string;
+  rank: string;
+  target: string;
+  request_type: WarrantRequestType;
+  request_type_other?: string;
+  evidence_urls: string[];
+  reason: string;
+  status: WarrantStatus;
+  judge_note?: string;
+  created_at: string;
+}
+
+export async function fetchWarrants(): Promise<Warrant[]> {
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("warrants")
+    .select("*")
+    .order("created_at", { ascending: false });
+  return (data ?? []).map((w) => ({
+    ...w,
+    evidence_urls: Array.isArray(w.evidence_urls) ? w.evidence_urls : [],
+  })) as Warrant[];
+}
+
+export async function insertWarrant(w: Omit<Warrant, "id" | "created_at"> & { request_type_other?: string }): Promise<string | null> {
+  if (!supabase) return null;
+  const payload: Record<string, unknown> = {
+    applicant_name: w.applicant_name,
+    department: w.department,
+    rank: w.rank,
+    target: w.target,
+    request_type: w.request_type,
+    evidence_urls: Array.isArray(w.evidence_urls) ? w.evidence_urls : [],
+    reason: w.reason,
+    status: w.status ?? "Pending",
+  };
+  if (w.request_type === "Other" && w.request_type_other?.trim()) {
+    payload.request_type_other = w.request_type_other.trim();
+  }
+  const { data, error } = await supabase
+    .from("warrants")
+    .insert(payload)
+    .select("id")
+    .single();
+  if (error) {
+    console.error("insertWarrant error:", error.message, error.details, error);
+    return null;
+  }
+  return data?.id ?? null;
+}
+
+export async function updateWarrantStatus(
+  id: string,
+  status: WarrantStatus,
+  judgeNote?: string
+): Promise<boolean> {
+  if (!supabase) return false;
+  const payload: Record<string, unknown> = { status };
+  if (judgeNote !== undefined) payload.judge_note = judgeNote;
+  const { error } = await supabase.from("warrants").update(payload).eq("id", id);
+  return !error;
+}

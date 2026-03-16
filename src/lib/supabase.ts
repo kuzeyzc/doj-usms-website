@@ -133,6 +133,38 @@ export interface BatchUploadResult {
   failed: { file: File; error: string }[];
 }
 
+const WARRANTS_BUCKET = "warrants";
+const IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "webp", "gif"] as const;
+
+/** Delil fotoğraflarını warrants bucket'a yükler, URL listesi döner */
+export async function uploadWarrantEvidence(
+  files: File[]
+): Promise<{ urls: string[]; failed: { file: File; error: string }[] }> {
+  const result = { urls: [] as string[], failed: [] as { file: File; error: string }[] };
+  if (!supabase) {
+    result.failed = files.map((f) => ({ file: f, error: "Supabase yapılandırılmamış" }));
+    return result;
+  }
+  for (const file of files) {
+    const ext = (file.name.split(".").pop()?.toLowerCase() || "png").replace(/[^a-z0-9]/g, "");
+    const safeExt = IMAGE_EXTENSIONS.includes(ext as (typeof IMAGE_EXTENSIONS)[number]) ? ext : "png";
+    const path = `evidence/${Date.now()}-${Math.random().toString(36).slice(2)}.${safeExt}`;
+    const contentType = file.type || (safeExt === "png" ? "image/png" : "image/jpeg");
+    const { error } = await supabase.storage.from(WARRANTS_BUCKET).upload(path, file, {
+      cacheControl: "3600",
+      upsert: true,
+      contentType,
+    });
+    if (error) {
+      result.failed.push({ file, error: error.message });
+    } else {
+      const { data } = supabase.storage.from(WARRANTS_BUCKET).getPublicUrl(path);
+      result.urls.push(data.publicUrl);
+    }
+  }
+  return result;
+}
+
 /** Toplu dosya yükleme - documents/YYYY/MM/ path yapısı */
 export async function uploadDocumentFilesBatch(
   files: File[]

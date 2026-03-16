@@ -19,7 +19,7 @@ import {
   SidebarMenuButton,
   SidebarInset,
 } from "@/components/ui/sidebar";
-import { Shield, Settings, Users, FileText, Gavel, HelpCircle, Image, ClipboardList, LayoutDashboard, FileEdit } from "lucide-react";
+import { Shield, Settings, Users, FileText, Gavel, HelpCircle, Image, ClipboardList, LayoutDashboard, FileEdit, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -33,6 +33,7 @@ const navItems = [
   { to: "/admin/faq", icon: HelpCircle, label: "SSS" },
   { to: "/admin/gallery", icon: Image, label: "Galeri" },
   { to: "/admin/applications", icon: ClipboardList, label: "Başvurular" },
+  { to: "/admin/warrants", icon: Scale, label: "Adli Talepler" },
   { to: "/admin/form-editor", icon: FileEdit, label: "Form Editörü" },
 ];
 

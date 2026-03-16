@@ -7,6 +7,7 @@
     "gallery": "Galeri",
     "faq": "SSS",
     "apply": "Başvur",
+    "warrant": "Adli Talep",
     "brand": "U.S. MARSHALS"
   },
   "hero": {
@@ -207,6 +208,19 @@
     },
     "back": "Geri",
     "next": "İleri"
+  },
+  "warrant": {
+    "label": "Adli Talep",
+    "title": "ADLİ TALEP SİSTEMİ",
+    "intro": "USMS Başyargıçlığına yönelik baskın, arama veya gözetleme talepleri için aşağıdaki formu doldurun. Talebiniz incelenecek ve karar sonucu bildirilecektir.",
+    "applicantName": "Başvuran Adı",
+    "department": "Birim",
+    "rank": "Rütbe",
+    "target": "Hedef",
+    "requestType": "Talep Türü",
+    "reason": "Gerekçe",
+    "evidence": "Delil Görselleri",
+    "submit": "Talep Gönder"
   },
   "404": {
     "title": "404",

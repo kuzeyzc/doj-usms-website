@@ -40,6 +40,11 @@ VITE_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
 2. Public: Evet
 3. Allowed MIME types: Boş veya `image/*`
 
+**warrants** bucket (Adli Talep delil görselleri için):
+1. Bucket adı: `warrants`
+2. Public: Evet
+3. Allowed MIME types: `image/png`, `image/jpeg`, `image/jpg`, `image/webp`, `image/gif`
+
 ### Storage Policies (Önemli!)
 
 Bucket oluşturduktan sonra **Storage → documents → Policies** bölümüne gidin ve şu politikaları ekleyin:

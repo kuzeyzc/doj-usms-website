@@ -16,6 +16,12 @@ const DISCORD_WEBHOOK_APPLICATIONS_APPROVED =
   import.meta.env.VITE_DISCORD_WEBHOOK_APPLICATIONS_APPROVED ||
   "https://discord.com/api/webhooks/1482746444975837274/R_U6_vfffEXjO7_Z9FJ7-mARcnVw5GxJtgZ9c3_G_FBvBhCFWEXOQrJ-iflPec_H-L1n";
 
+/** Adli Talep kararları - Onay/Red bildirimi */
+const DISCORD_WEBHOOK_WARRANTS =
+  import.meta.env.VITE_DISCORD_WEBHOOK_WARRANTS ||
+  import.meta.env.VITE_DISCORD_WEBHOOK_URL ||
+  "";
+
 const DOJ_GOLD = 0xd4af37; // #D4AF37
 const GREEN = 0x00ff00; // #00FF00 - Onay rengi
 
@@ -250,6 +256,110 @@ export async function sendApplicationApprovalToDiscord(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+/** Adli Talep - her talep gönderildiğinde Discord'a embed olarak iletilir */
+export interface WarrantWebhookPayload {
+  caseId: string;
+  applicantName: string;
+  department: string;
+  rank: string;
+  target: string;
+  requestType: string;
+  reason: string;
+  evidenceUrls: string[];
+  createdAt: string;
+}
+
+const REQUEST_TYPE_LABELS: Record<string, string> = {
+  Raid: "Baskın",
+  Search: "Arama",
+  Surveillance: "Gözetleme",
+  Other: "Diğer",
+};
+
+function formatWarrantRequestType(requestType: string, requestTypeOther?: string): string {
+  if (requestType === "Other" && requestTypeOther?.trim()) {
+    return `Diğer: ${requestTypeOther.trim()}`;
+  }
+  return REQUEST_TYPE_LABELS[requestType] ?? requestType;
+}
+
+export async function sendWarrantToDiscord(
+  payload: WarrantWebhookPayload & { requestTypeOther?: string }
+): Promise<boolean> {
+  if (!DISCORD_WEBHOOK_WARRANTS) return false;
+
+  const requestTypeLabel = formatWarrantRequestType(
+    payload.requestType,
+    payload.requestTypeOther
+  );
+  const imageUrls = (payload.evidenceUrls ?? [])
+    .filter((u) => /\.(png|jpg|jpeg|webp|gif)(\?|$)/i.test(u.split("?")[0]))
+    .slice(0, 10);
+  const sharedUrl = imageUrls[0] ?? (typeof window !== "undefined" ? `${window.location.origin}/warrant` : "https://doj-marshals.example/");
+
+  const mainFields: { name: string; value: string; inline?: boolean }[] = [
+    { name: "Dosya No", value: payload.caseId, inline: true },
+    { name: "Talep Türü", value: requestTypeLabel, inline: true },
+    { name: "Tarih", value: new Date(payload.createdAt).toLocaleString("tr-TR"), inline: true },
+    { name: "Başvuran", value: `${payload.applicantName} (${payload.rank})`, inline: true },
+    { name: "Birim", value: payload.department, inline: true },
+    { name: "Hedef", value: payload.target, inline: true },
+    { name: "Gerekçe", value: payload.reason.slice(0, 1024), inline: false },
+  ];
+
+  const embeds: {
+    title?: string;
+    color: number;
+    fields?: { name: string; value: string; inline?: boolean }[];
+    timestamp: string;
+    image?: { url: string };
+    footer?: { text: string };
+  }[] = [];
+
+  if (imageUrls.length === 0) {
+    embeds.push({
+      title: "📋 Yeni Adli Talep",
+      url: sharedUrl,
+      color: DOJ_GOLD,
+      fields: mainFields,
+      timestamp: new Date().toISOString(),
+      footer: { text: "USMS Başyargıçlığı — Adli Talep Sistemi" },
+    });
+  } else {
+    imageUrls.forEach((imgUrl, i) => {
+      if (i === 0) {
+        embeds.push({
+          title: "📋 Yeni Adli Talep",
+          url: sharedUrl,
+          color: DOJ_GOLD,
+          fields: mainFields,
+          timestamp: new Date().toISOString(),
+          image: { url: imgUrl },
+          footer: { text: "USMS Başyargıçlığı — Adli Talep Sistemi" },
+        });
+      } else {
+        embeds.push({
+          url: sharedUrl,
+          color: DOJ_GOLD,
+          timestamp: new Date().toISOString(),
+          image: { url: imgUrl },
+        });
+      }
+    });
+  }
+
+  try {
+    const res = await fetch(DISCORD_WEBHOOK_WARRANTS, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ embeds }),
     });
     return res.ok;
   } catch {

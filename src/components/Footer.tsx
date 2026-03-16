@@ -34,6 +34,7 @@ export default function Footer() {
                 { label: t("nav.rules"), path: "/rules" },
                 { label: t("nav.documents"), path: "/documents" },
                 { label: t("nav.apply"), path: "/apply" },
+                { label: t("nav.warrant"), path: "/warrant" },
                 { label: t("nav.faq"), path: "/faq" },
               ].map((l) => (
                 <Link key={l.path} to={l.path} className="text-sm text-muted-foreground hover:text-primary transition-colors">
