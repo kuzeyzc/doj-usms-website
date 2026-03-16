@@ -2,12 +2,17 @@
   "nav": {
     "home": "Ana Sayfa",
     "about": "Hakkımızda",
+    "corporate": "Kurumsal",
     "rules": "Kurallar",
+    "blog": "Blog",
     "documents": "Belgeler",
     "gallery": "Galeri",
+    "services": "Hizmetler",
     "faq": "SSS",
     "apply": "Başvur",
     "warrant": "Adli Talep",
+    "documentGenerator": "Belge Oluşturucu",
+    "staffLogin": "Personel Girişi",
     "brand": "U.S. MARSHALS"
   },
   "hero": {
@@ -58,7 +63,8 @@
     "quickLinks": "Hızlı Bağlantılar",
     "contact": "İletişim",
     "discord": "Discord Sunucusu",
-    "copyright": "© 2026 U.S. Marshals Service — District of San Andreas | FiveM Roleplay"
+    "copyright": "© 2026 U.S. Marshals Service — District of San Andreas | FiveM Roleplay",
+    "disclaimer": "Bu site FiveM üzerine kuruludur ve gerçek dünya ile herhangi bir bağlantısı bulunmamaktadır. Tüm içerik hayali roleplay amaçlıdır."
   },
   "about": {
     "label": "Hakkımızda",
@@ -222,6 +228,24 @@
     "evidence": "Delil Görselleri",
     "submit": "Talep Gönder"
   },
+  "documentGenerator": {
+    "label": "Resmi Belge",
+    "title": "RESMİ BELGE OLUŞTURUCU",
+    "intro": "Departman logosu, antet ve imza ile profesyonel resmi belgeler oluşturun. PDF olarak indirebilirsiniz.",
+    "department": "Departman / Birim",
+    "sender": "Gönderen",
+    "recipient": "Alıcı",
+    "subject": "Konu",
+    "date": "Tarih",
+    "fileNo": "Dosya No",
+    "content": "Belge İçeriği",
+    "signatureTitle": "İmza Ünvanı",
+    "signatureName": "İmza Sahibi",
+    "customLogo": "Özel Logo",
+    "uploadLogo": "Logo Yükle",
+    "removeLogo": "Yüklenen logoyu kaldır",
+    "exportPdf": "PDF İndir"
+  },
   "404": {
     "title": "404",
     "message": "Sayfa bulunamadı",
@@ -229,7 +253,16 @@
   },
   "admin": {
     "loginTitle": "Admin Girişi",
+    "portalTitle": "DOJ - Personel Portalı",
+    "portalSubtitle": "Yetkili personel erişim alanı",
+    "federalPortal": "Federal Portal",
+    "federalPortalSubtitle": "United States Marshals Service",
+    "personnelId": "Personel ID",
+    "personnelIdPlaceholder": "Personel numaranız",
     "password": "Şifre",
+    "passwordPlaceholder": "Şifrenizi girin",
+    "rememberMe": "Beni Hatırla",
+    "forgotPassword": "Şifremi Unuttum",
     "login": "Giriş Yap",
     "logout": "Çıkış",
     "wrongPassword": "Geçersiz şifre.",

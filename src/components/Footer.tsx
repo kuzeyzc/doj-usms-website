@@ -35,6 +35,7 @@ export default function Footer() {
                 { label: t("nav.documents"), path: "/documents" },
                 { label: t("nav.apply"), path: "/apply" },
                 { label: t("nav.warrant"), path: "/warrant" },
+                { label: t("nav.documentGenerator"), path: "/document-generator" },
                 { label: t("nav.faq"), path: "/faq" },
               ].map((l) => (
                 <Link key={l.path} to={l.path} className="text-sm text-muted-foreground hover:text-primary transition-colors">
@@ -58,9 +59,12 @@ export default function Footer() {
             </a>
           </div>
         </div>
-        <div className="mt-10 pt-6 border-t border-primary/10 text-center">
+        <div className="mt-10 pt-6 border-t border-primary/10 text-center space-y-2">
           <p className="text-xs text-muted-foreground font-body tabular-nums">
             {general.footerCopyright ?? t("footer.copyright")}
+          </p>
+          <p className="text-xs text-muted-foreground/80 font-body italic">
+            {t("footer.disclaimer")}
           </p>
         </div>
       </div>

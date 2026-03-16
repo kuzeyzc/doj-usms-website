@@ -16,6 +16,7 @@ export default {
       fontFamily: {
         heading: ["Montserrat", "sans-serif"],
         body: ["Lato", "sans-serif"],
+        signature: ["Dancing Script", "cursive"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -98,5 +99,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 } satisfies Config;

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Montserrat:wght@400;500;600;700;800&family=Lato:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Montserrat:wght@400;500;600;700;800&family=Lato:wght@300;400;700&family=Dancing+Script:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -154,5 +154,30 @@
   }
   .input-glow:focus {
     box-shadow: 0 0 0 1px hsl(var(--ring)), var(--gold-glow);
+  }
+
+  /* Belge editörü - metin rengi ve Türkçe karakter desteği */
+  .document-editor .ql-editor,
+  .document-editor .ql-editor p,
+  .document-editor .ql-editor li,
+  .document-editor .ql-editor span {
+    color: #1f2937 !important;
+    font-family: "Lato", "Segoe UI", Arial, sans-serif !important;
+  }
+  .document-editor .ql-editor.ql-blank::before {
+    color: #9ca3af !important;
+    font-family: "Lato", "Segoe UI", Arial, sans-serif !important;
+  }
+  .document-editor .ql-toolbar {
+    font-family: "Lato", "Segoe UI", Arial, sans-serif !important;
+  }
+  /* Belge önizleme içeriği - Türkçe karakter desteği */
+  .document-content,
+  .document-content p,
+  .document-content li,
+  .document-content span,
+  .document-content strong,
+  .document-content em {
+    font-family: "Lato", "Segoe UI", Arial, sans-serif !important;
   }
 }
