@@ -1,13 +1,10 @@
 import { useState, useEffect } from "react";
-import { Outlet, NavLink, useNavigate, useLocation, Navigate } from "react-router-dom";
-import { isSupabaseEnabled, supabase } from "@/lib/supabase";
+import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
-  getCurrentUser,
-  getProfile,
-  isProfileAdmin,
-  type Profile,
-  type Rank,
-} from "@/lib/auth";
+  isAdminAuthenticated,
+  setAdminAuthenticated,
+  getAdminPassword,
+} from "@/lib/admin";
 import {
   SidebarProvider,
   Sidebar,
@@ -21,29 +18,12 @@ import {
   SidebarMenuButton,
   SidebarInset,
 } from "@/components/ui/sidebar";
-import {
-  Shield,
-  Settings,
-  Users,
-  FileText,
-  Gavel,
-  HelpCircle,
-  Image,
-  ClipboardList,
-  LayoutDashboard,
-  FileEdit,
-  Scale,
-  UserPlus,
-  Award,
-} from "lucide-react";
+import { Shield, Settings, Users, FileText, Gavel, HelpCircle, Image, ClipboardList, LayoutDashboard, FileEdit, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import AdminLoginView from "@/components/AdminLoginView";
-import PersonnelActivationView from "@/components/PersonnelActivationView";
+import { Input } from "@/components/ui/input";
 
 const navItems = [
   { to: "/admin", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/admin/personnel", icon: UserPlus, label: "Personel Oluştur" },
-  { to: "/admin/ranks", icon: Award, label: "Rütbe Yönetimi" },
   { to: "/admin/settings", icon: Settings, label: "Genel Ayarlar" },
   { to: "/admin/hierarchy", icon: Users, label: "Komuta Zinciri" },
   { to: "/admin/documents", icon: FileText, label: "Belgeler" },
@@ -57,129 +37,54 @@ const navItems = [
 
 export default function AdminLayout() {
   const location = useLocation();
+  const [auth, setAuth] = useState(false);
+  const [pass, setPass] = useState("");
+  const [err, setErr] = useState("");
   const navigate = useNavigate();
-  const [user, setUser] = useState<{ id: string } | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isSupabaseEnabled || !supabase) {
-      setLoading(false);
-      return;
-    }
-
-    let cancelled = false;
-    const timeout = setTimeout(() => {
-      if (!cancelled) setLoading(false);
-    }, 5000);
-
-    const init = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        if (cancelled) return;
-        const sessUser = data.session?.user;
-        if (sessUser) {
-          setUser(sessUser);
-          try {
-            const p = await getProfile(sessUser.id);
-            if (cancelled) return;
-            setProfile(p);
-          } catch {
-            if (!cancelled) setProfile(null);
-          }
-        }
-      } catch {
-        // Auth hatası
-      } finally {
-        if (!cancelled) {
-          clearTimeout(timeout);
-          setLoading(false);
-        }
-      }
-    };
-
-    init();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        setUser(session.user);
-        try {
-          const p = await getProfile(session.user.id);
-          setProfile(p);
-        } catch {
-          setProfile(null);
-        }
-      } else {
-        setUser(null);
-        setProfile(null);
-      }
-    });
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timeout);
-      subscription.unsubscribe();
-    };
+    setAuth(isAdminAuthenticated());
   }, []);
 
-  const handleLogout = async () => {
-    if (supabase) await supabase.auth.signOut();
-    setUser(null);
-    setProfile(null);
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pass === getAdminPassword()) {
+      setAdminAuthenticated(true);
+      setAuth(true);
+      setErr("");
+    } else {
+      setErr("Geçersiz şifre.");
+    }
+  };
+
+  const handleLogout = () => {
+    setAdminAuthenticated(false);
+    setAuth(false);
     navigate("/admin");
   };
 
-  const isAdmin = profile?.rank ? (profile.rank as Rank).is_admin : false;
-
-  if (loading) {
+  if (!auth) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <div className="animate-pulse text-primary">Yükleniyor...</div>
-        <p className="text-sm text-muted-foreground">5 saniye içinde giriş sayfası açılır</p>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setLoading(false)}
-          className="text-muted-foreground hover:text-foreground"
-        >
-          Şimdi giriş sayfasına git
-        </Button>
-      </div>
-    );
-  }
-
-  if (!isSupabaseEnabled || !supabase) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="text-center max-w-md">
-          <p className="text-destructive font-heading mb-4">
-            Personel sistemi için Supabase yapılandırılmalıdır.
-          </p>
-          <p className="text-muted-foreground text-sm">
-            .env dosyasında VITE_SUPABASE_URL ve VITE_SUPABASE_ANON_KEY tanımlayın.
-          </p>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="w-full max-w-sm p-8 bg-surface-elevated rounded-lg border border-primary/20">
+          <div className="flex items-center gap-2 mb-6">
+            <Shield className="w-6 h-6 text-primary" />
+            <h1 className="font-heading text-xl font-bold">Personel Girişi</h1>
+          </div>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <Input
+              type="password"
+              value={pass}
+              onChange={(e) => setPass(e.target.value)}
+              placeholder="Şifre"
+              className="input-glow"
+            />
+            {err && <p className="text-sm text-destructive">{err}</p>}
+            <Button type="submit" className="w-full">Giriş Yap</Button>
+          </form>
         </div>
       </div>
     );
-  }
-
-  if (!user) {
-    return <AdminLoginView onSuccess={() => window.location.reload()} />;
-  }
-
-  if (profile && !profile.is_registered) {
-    return (
-      <PersonnelActivationView
-        userId={user.id}
-        onSuccess={() => window.location.reload()}
-      />
-    );
-  }
-
-  if (profile && !isAdmin) {
-    return <Navigate to="/personnel" replace />;
   }
 
   return (
@@ -198,14 +103,7 @@ export default function AdminLayout() {
               <SidebarMenu>
                 {navItems.map((item) => (
                   <SidebarMenuItem key={item.to}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={
-                        location.pathname === item.to ||
-                        (item.to !== "/admin" &&
-                          location.pathname.startsWith(item.to))
-                      }
-                    >
+                    <SidebarMenuButton asChild isActive={location.pathname === item.to || (item.to !== "/admin" && location.pathname.startsWith(item.to))}>
                       <NavLink to={item.to}>
                         <item.icon className="w-4 h-4" />
                         <span>{item.label}</span>
@@ -218,22 +116,14 @@ export default function AdminLayout() {
           </SidebarGroup>
         </SidebarContent>
         <div className="p-4 border-t border-primary/10">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full"
-            onClick={handleLogout}
-          >
+          <Button variant="outline" size="sm" className="w-full" onClick={handleLogout}>
             Çıkış
           </Button>
         </div>
       </Sidebar>
       <SidebarInset>
         <header className="flex h-14 items-center gap-4 border-b border-primary/10 px-6">
-          <NavLink
-            to="/"
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
+          <NavLink to="/" className="text-sm text-muted-foreground hover:text-foreground">
             ← Siteye Dön
           </NavLink>
         </header>
