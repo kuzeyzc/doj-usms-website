@@ -247,7 +247,16 @@
     "customLogo": "Özel Logo",
     "uploadLogo": "Logo Yükle",
     "removeLogo": "Yüklenen logoyu kaldır",
-    "exportPdf": "PDF İndir"
+    "exportPdf": "PDF İndir",
+    "exportPng": "PNG Olarak İndir",
+    "publishCategory": "Kategori Seçimi",
+    "publishToSite": "Sitede Yayınla",
+    "publishSuccess": "Belge başarıyla yayınlandı ve Belgeler sayfasına eklendi!",
+    "publishSelectCategory": "Kategori seçin",
+    "publishLoading": "Yükleniyor...",
+    "categoryCase": "Dava Dosyaları",
+    "categoryAnnouncement": "Duyuru",
+    "categoryProtocol": "Protokol"
   },
   "blog": {
     "title": "TÜM BLOGLAR",
@@ -285,6 +294,8 @@
     "forgotPassword": "Şifremi Unuttum",
     "login": "Giriş Yap",
     "logout": "Çıkış",
+    "logoutTooltip": "Çıkış Yap",
+    "backToHome": "Ana Sayfaya Dön",
     "wrongPassword": "Geçersiz şifre.",
     "title": "Başlık",
     "categoryLabel": "Kategori",

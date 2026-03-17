@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, NavLink, useNavigate, useLocation, Link } from "react-router-dom";
 import {
   isAdminAuthenticated,
   setAdminAuthenticated,
@@ -21,6 +21,7 @@ import {
 import { Shield, Settings, Users, FileText, Gavel, HelpCircle, Image, ClipboardList, LayoutDashboard, FileEdit, Scale, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "react-i18next";
 
 const navItems = [
   { to: "/admin", icon: LayoutDashboard, label: "Dashboard" },
@@ -37,6 +38,7 @@ const navItems = [
 ];
 
 export default function AdminLayout() {
+  const { t } = useTranslation();
   const location = useLocation();
   const [auth, setAuth] = useState(false);
   const [pass, setPass] = useState("");
@@ -68,6 +70,14 @@ export default function AdminLayout() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-sm p-8 bg-surface-elevated rounded-lg border border-primary/20">
+          <Link
+            to="/"
+            className="flex items-center justify-center gap-2 w-full mb-6 py-2.5 px-4 text-sm font-heading font-semibold tracking-wide rounded-md
+              bg-gradient-to-r from-amber-500/90 via-primary to-amber-600/90 text-primary-foreground
+              hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all duration-300 border border-amber-400/30"
+          >
+            ← {t("admin.backToHome")}
+          </Link>
           <div className="flex items-center gap-2 mb-6">
             <Shield className="w-6 h-6 text-primary" />
             <h1 className="font-heading text-xl font-bold">Personel Girişi</h1>

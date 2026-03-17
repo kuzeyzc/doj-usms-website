@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { Download, Shield, Upload, X } from "lucide-react";
+import { Download, Image as ImageIcon, Shield, Upload, X, Loader2, Globe } from "lucide-react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import Navbar from "@/components/Navbar";
@@ -9,10 +9,16 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
+import { useQueryClient } from "@tanstack/react-query";
+import { isAdminAuthenticated } from "@/lib/admin";
+import { uploadDocumentFile, insertDocument, isSupabaseEnabled } from "@/lib/supabase";
+import { toast } from "sonner";
+import type { DocumentCategory } from "@/types/document";
 
 const DEPARTMENTS: { id: string; name: string; logo: string | null }[] = [
   { id: "DOJ", name: "Department Of Justice", logo: "/logo-doj.png" },
@@ -33,6 +39,12 @@ function generateFileNumber(deptId: string): string {
   return `${deptId}-${year}-${random}`;
 }
 
+const PUBLISH_CATEGORIES: { value: DocumentCategory; labelKey: string }[] = [
+  { value: "case", labelKey: "documentGenerator.categoryCase" },
+  { value: "announcement", labelKey: "documentGenerator.categoryAnnouncement" },
+  { value: "protocol", labelKey: "documentGenerator.categoryProtocol" },
+];
+
 export default function DocumentGeneratorPage() {
   const { t } = useTranslation();
   const docRef = useRef<HTMLDivElement>(null);
@@ -45,6 +57,10 @@ export default function DocumentGeneratorPage() {
   const [signatureName, setSignatureName] = useState("");
   const [customLogoUrl, setCustomLogoUrl] = useState<string | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const [publishCategory, setPublishCategory] = useState<DocumentCategory | "">("");
+  const [publishLoading, setPublishLoading] = useState(false);
+  const isAdmin = isAdminAuthenticated();
+  const queryClient = useQueryClient();
 
   const today = format(new Date(), "d MMMM yyyy", { locale: tr });
   const fileNumber = useMemo(() => generateFileNumber(department.id), [department.id]);
@@ -109,6 +125,118 @@ export default function DocumentGeneratorPage() {
       console.error("PDF export error:", err);
     }
   }, [fileNumber, subject]);
+
+  const exportPng = useCallback(async () => {
+    if (!docRef.current) return;
+
+    try {
+      const canvas = await html2canvas(docRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      });
+
+      const safeSubject = (subject || "Belge").replace(/[^a-zA-Z0-9\u00C0-\u024F\s-]/g, "").slice(0, 40).replace(/\s+/g, "_");
+      const baseName = `${fileNumber}_${safeSubject}`;
+
+      const A4_RATIO = 297 / 210;
+      const pageHeightPx = canvas.width * A4_RATIO;
+      const numPages = Math.ceil(canvas.height / pageHeightPx);
+
+      if (numPages <= 1) {
+        const link = document.createElement("a");
+        link.download = `${baseName}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      } else {
+        for (let page = 0; page < numPages; page++) {
+          const sy = page * pageHeightPx;
+          const sh = Math.min(pageHeightPx, canvas.height - sy);
+          const pageCanvas = document.createElement("canvas");
+          pageCanvas.width = canvas.width;
+          pageCanvas.height = sh;
+          const ctx = pageCanvas.getContext("2d");
+          if (ctx) {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+            ctx.drawImage(canvas, 0, sy, canvas.width, sh, 0, 0, canvas.width, sh);
+            const link = document.createElement("a");
+            link.download = `${baseName}_${page + 1}.png`;
+            link.href = pageCanvas.toDataURL("image/png");
+            link.click();
+          }
+        }
+      }
+    } catch (err) {
+      console.error("PNG export error:", err);
+    }
+  }, [fileNumber, subject]);
+
+  const publishToSite = useCallback(async () => {
+    if (!docRef.current || !publishCategory || publishLoading || !isSupabaseEnabled) return;
+
+    setPublishLoading(true);
+    try {
+      const canvas = await html2canvas(docRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      });
+
+      const A4_RATIO = 297 / 210;
+      const pageHeightPx = canvas.width * A4_RATIO;
+      const useCanvas = canvas.height <= pageHeightPx ? canvas : (() => {
+        const pageCanvas = document.createElement("canvas");
+        pageCanvas.width = canvas.width;
+        pageCanvas.height = pageHeightPx;
+        const ctx = pageCanvas.getContext("2d");
+        if (ctx) {
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+          ctx.drawImage(canvas, 0, 0, canvas.width, pageHeightPx, 0, 0, canvas.width, pageHeightPx);
+        }
+        return pageCanvas;
+      })();
+
+      const blob = await new Promise<Blob | null>((resolve) => {
+        useCanvas.toBlob((b) => resolve(b), "image/png", 1.0);
+      });
+      if (!blob) throw new Error("PNG oluşturulamadı");
+
+      const safeSubject = (subject || "Belge").replace(/[^a-zA-Z0-9\u00C0-\u024F\s-]/g, "").slice(0, 40).replace(/\s+/g, "_");
+      const file = new File([blob], `${fileNumber}_${safeSubject}.png`, { type: "image/png" });
+
+      const uploadResult = await uploadDocumentFile(file);
+      if ("error" in uploadResult) {
+        toast.error(uploadResult.error);
+        return;
+      }
+
+      const docTitle = subject?.trim() || "Belge";
+      const docDate = format(new Date(), "yyyy-MM-dd");
+      const id = await insertDocument({
+        title: docTitle,
+        category: publishCategory as DocumentCategory,
+        date: docDate,
+        file_url: uploadResult.url,
+        file_type: "png",
+      });
+
+      if (id) {
+        queryClient.invalidateQueries({ queryKey: ["documents"] });
+        toast.success(t("documentGenerator.publishSuccess"));
+      } else {
+        toast.error("Belge kaydedilemedi.");
+      }
+    } catch (err) {
+      console.error("Publish error:", err);
+      toast.error("Yayınlama sırasında bir hata oluştu.");
+    } finally {
+      setPublishLoading(false);
+    }
+  }, [fileNumber, subject, publishCategory, t, queryClient]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -256,6 +384,15 @@ export default function DocumentGeneratorPage() {
                   </div>
                 </div>
 
+                <div className="flex flex-col gap-2">
+                <Button
+                  onClick={exportPng}
+                  className="w-full gap-2"
+                  size="lg"
+                >
+                  <ImageIcon className="w-4 h-4" />
+                  {t("documentGenerator.exportPng")}
+                </Button>
                 <Button
                   onClick={exportPdf}
                   className="w-full gap-2"
@@ -264,6 +401,64 @@ export default function DocumentGeneratorPage() {
                   <Download className="w-4 h-4" />
                   {t("documentGenerator.exportPdf")}
                 </Button>
+
+                {isAdmin && (
+                  <div
+                    className="mt-4 pt-4 border-t border-amber-500/25 rounded-lg p-4 space-y-3"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(212,175,55,0.06) 0%, rgba(15,15,20,0.4) 100%)",
+                      backdropFilter: "blur(8px)",
+                    }}
+                  >
+                    <Label className="text-xs uppercase tracking-section text-amber-500/90 font-semibold">
+                      {t("documentGenerator.publishCategory")}
+                    </Label>
+                    <Select
+                      value={publishCategory || undefined}
+                      onValueChange={(v) => setPublishCategory((v || "") as DocumentCategory | "")}
+                    >
+                      <SelectTrigger
+                        className="w-full bg-surface-elevated/80 border-amber-500/30 text-foreground rounded-md hover:border-amber-500/50 focus:ring-amber-500/30"
+                        placeholder={t("documentGenerator.publishSelectCategory")}
+                      >
+                        <SelectValue placeholder={t("documentGenerator.publishSelectCategory")} />
+                      </SelectTrigger>
+                      <SelectContent
+                        className="border-amber-500/20 bg-surface-elevated/95 backdrop-blur-xl"
+                        style={{ boxShadow: "0 0 24px rgba(212,175,55,0.15)" }}
+                      >
+                        {PUBLISH_CATEGORIES.map((c) => (
+                          <SelectItem
+                            key={c.value}
+                            value={c.value}
+                            className="focus:bg-amber-500/15 focus:text-primary"
+                          >
+                            {t(c.labelKey)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      onClick={publishToSite}
+                      disabled={!publishCategory || publishLoading}
+                      className="w-full gap-2 bg-gradient-to-r from-amber-500/90 via-primary to-amber-600/90 text-primary-foreground border border-amber-400/30 hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] disabled:opacity-50"
+                      size="lg"
+                    >
+                      {publishLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          {t("documentGenerator.publishLoading")}
+                        </>
+                      ) : (
+                        <>
+                          <Globe className="w-4 h-4" />
+                          {t("documentGenerator.publishToSite")}
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
               </motion.div>
 
               {/* Document Preview - Ortada */}

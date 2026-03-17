@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSiteSettings } from "@/hooks/useSiteData";
 import { Link, useLocation } from "react-router-dom";
-import { isAdminAuthenticated } from "@/lib/admin";
+import { isAdminAuthenticated, setAdminAuthenticated } from "@/lib/admin";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
-import { Menu, X, Shield, Sun, Moon, ChevronDown, Key, LayoutDashboard, BookOpen, PenSquare, HelpCircle, Scale, FileEdit } from "lucide-react";
+import { Menu, X, Shield, Sun, Moon, ChevronDown, Key, LayoutDashboard, LogOut, BookOpen, PenSquare, HelpCircle, Scale, FileEdit } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 /* Kurumsal: Kurallar, Blog, SSS */
@@ -180,7 +180,16 @@ export default function Navbar() {
   const { general } = useSiteSettings();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const isAdmin = isAdminAuthenticated();
+
+  const handleLogout = () => {
+    setLoggingOut(true);
+    setTimeout(() => {
+      setAdminAuthenticated(false);
+      window.location.href = "/";
+    }, 300);
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -336,16 +345,24 @@ export default function Navbar() {
 
           {/* Admin / Personel Girişi */}
           {isAdmin ? (
-            <div className="ml-2 flex flex-col items-end gap-1">
-              <span className="text-sm font-heading font-medium text-primary">{t("nav.welcomeAdmin")}</span>
+            <div className={`ml-2 flex flex-row items-center gap-3 transition-opacity duration-300 ${loggingOut ? "opacity-0" : "opacity-100"}`}>
+              <span className="text-sm font-heading font-medium text-primary whitespace-nowrap">{t("nav.welcomeAdmin")}</span>
               <Link
                 to="/admin"
                 className="flex items-center gap-2 px-3 py-1.5 text-xs font-heading font-medium text-muted-foreground 
-                  hover:text-foreground transition-all duration-300 rounded-md hover:bg-primary/5 border border-primary/20"
+                  hover:text-foreground transition-all duration-300 rounded-md hover:bg-primary/5 border border-primary/20 whitespace-nowrap"
               >
-                <LayoutDashboard className="w-3.5 h-3.5" />
+                <LayoutDashboard className="w-3.5 h-3.5 shrink-0" />
                 {t("nav.adminPanel")}
               </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                title={t("admin.logoutTooltip")}
+                className="p-2 rounded-md text-red-500 hover:text-red-400 hover:bg-red-500/10 hover:shadow-[0_0_12px_rgba(239,68,68,0.4)] transition-all duration-300 shrink-0"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
           ) : (
             <Link
@@ -507,16 +524,27 @@ export default function Navbar() {
 
               {/* Admin / Personel Girişi - mobile */}
               {isAdmin ? (
-                <div className="border-t border-primary/10 mt-1 pt-2 flex flex-col gap-2">
-                  <span className="px-4 text-sm font-heading font-medium text-primary">{t("nav.welcomeAdmin")}</span>
+                <div className={`border-t border-primary/10 mt-1 pt-2 flex flex-row items-center gap-3 px-4 py-3 transition-opacity duration-300 ${loggingOut ? "opacity-0" : "opacity-100"}`}>
+                  <span className="text-sm font-heading font-medium text-primary flex-1">{t("nav.welcomeAdmin")}</span>
                   <Link
                     to="/admin"
                     onClick={() => setOpen(false)}
-                    className="flex items-center gap-2 px-4 py-3 text-sm font-heading font-medium text-muted-foreground hover:text-foreground rounded-md bg-primary/5 border border-primary/20"
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-heading font-medium text-muted-foreground hover:text-foreground rounded-md bg-primary/5 border border-primary/20"
                   >
-                    <LayoutDashboard className="w-4 h-4" />
+                    <LayoutDashboard className="w-3.5 h-3.5" />
                     {t("nav.adminPanel")}
                   </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      handleLogout();
+                    }}
+                    title={t("admin.logoutTooltip")}
+                    className="p-2 rounded-md text-red-500 hover:text-red-400 hover:bg-red-500/10 hover:shadow-[0_0_12px_rgba(239,68,68,0.4)] transition-all duration-300 shrink-0"
+                  >
+                    <LogOut className="w-5 h-5" />
+                  </button>
                 </div>
               ) : (
                 <Link
