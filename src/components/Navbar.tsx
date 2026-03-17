@@ -1,23 +1,23 @@
-﻿import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSiteSettings } from "@/hooks/useSiteData";
 import { Link, useLocation } from "react-router-dom";
 import { isAdminAuthenticated } from "@/lib/admin";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
-import { Menu, X, Shield, Sun, Moon, ChevronDown, Key, LayoutDashboard } from "lucide-react";
+import { Menu, X, Shield, Sun, Moon, ChevronDown, Key, LayoutDashboard, BookOpen, PenSquare, HelpCircle, Scale, FileEdit } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 /* Kurumsal: Kurallar, Blog, SSS */
 const corporateItems = [
-  { key: "rules", path: "/rules" },
-  { key: "blog", path: "/blog" },
-  { key: "faq", path: "/faq" },
+  { key: "rules", path: "/rules", icon: BookOpen },
+  { key: "blog", path: "/blog", icon: PenSquare },
+  { key: "faq", path: "/faq", icon: HelpCircle },
 ] as const;
 
 /* Hizmetler: Adli Talep, Belge Oluşturucu */
 const servicesItems = [
-  { key: "warrant", path: "/warrant" },
-  { key: "documentGenerator", path: "/document-generator" },
+  { key: "warrant", path: "/warrant", icon: Scale },
+  { key: "documentGenerator", path: "/document-generator", icon: FileEdit },
 ] as const;
 
 const fixedLinks = [
@@ -99,8 +99,12 @@ function DropdownMenu({
   onClose,
   t,
   pathname,
+  onHoverEnter,
+  onHoverLeave,
 }: {
   items: readonly { key: string; path: string }[];
+  onHoverEnter?: () => void;
+  onHoverLeave?: () => void;
   isOpen: boolean;
   onClose: () => void;
   t: (k: string) => string;
@@ -123,29 +127,38 @@ function DropdownMenu({
       {isOpen && (
         <motion.div
           ref={ref}
+          onMouseEnter={onHoverEnter}
+          onMouseLeave={onHoverLeave}
           initial={{ opacity: 0, y: -8, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -8, scale: 0.96 }}
           transition={{ duration: 0.25, ease: [0.2, 0.8, 0.2, 1] }}
-          className="absolute top-full left-0 mt-1 min-w-[180px] rounded-lg overflow-hidden"
+          className="absolute top-full left-0 pt-2 min-w-[260px] rounded-xl overflow-hidden border border-amber-500/25 shadow-[0_0_32px_rgba(212,175,55,0.2),0_8px_32px_rgba(0,0,0,0.5)]"
           style={{
-            background: "rgba(0,0,0,0.8)",
-            backdropFilter: "blur(12px)",
-            boxShadow: "0 0 24px rgba(212, 175, 55, 0.25), 0 4px 24px rgba(0,0,0,0.4)",
-            border: "1px solid rgba(212, 175, 55, 0.2)",
+            background: "linear-gradient(180deg, rgba(15,15,20,0.95) 0%, rgba(10,10,15,0.98) 100%)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
           }}
         >
-          <div className="py-1">
+          <div className="py-2 px-1">
             {items.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
                 onClick={onClose}
-                className={`block px-4 py-2.5 text-sm font-heading font-medium transition-colors duration-200 hover:bg-primary/10 ${
-                  pathname === item.path ? "text-primary bg-primary/5" : "text-muted-foreground hover:text-foreground"
+                className={`flex items-center gap-3 px-5 py-3.5 text-base font-heading font-medium transition-all duration-200 rounded-lg hover:bg-amber-500/15 hover:text-primary hover:shadow-[0_0_12px_rgba(212,175,55,0.15)] ${
+                  pathname === item.path ? "text-primary bg-amber-500/10" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {t(`nav.${item.key}`)}
+                {(() => {
+                  const Icon = "icon" in item ? item.icon : null;
+                  return (
+                    <>
+                      {Icon && <Icon className="w-5 h-5 shrink-0 text-primary/80" />}
+                      <span>{t(`nav.${item.key}`)}</span>
+                    </>
+                  );
+                })()}
               </Link>
             ))}
           </div>
@@ -181,6 +194,8 @@ export default function Navbar() {
 
   const isCorporateActive = corporateItems.some((i) => pathname === i.path);
   const isServicesActive = servicesItems.some((i) => pathname === i.path);
+  const corporateCloseRef = useRef(null);
+  const servicesCloseRef = useRef(null);
 
   return (
     <nav
@@ -223,8 +238,21 @@ export default function Navbar() {
             />
           ))}
 
-          {/* Kurumsal dropdown */}
-          <div className="relative">
+          {/* Kurumsal dropdown - hover */}
+          <div
+            className="relative"
+            onMouseEnter={() => {
+              if (servicesCloseRef.current) {
+                clearTimeout(servicesCloseRef.current);
+                servicesCloseRef.current = null;
+              }
+              setCorporateOpen(true);
+              setServicesOpen(false);
+            }}
+            onMouseLeave={() => {
+              corporateCloseRef.current = setTimeout(() => setCorporateOpen(false), 120);
+            }}
+          >
             <DropdownTrigger
               label={t("nav.corporate")}
               isOpen={corporateOpen}
@@ -238,13 +266,35 @@ export default function Navbar() {
               items={corporateItems}
               isOpen={corporateOpen}
               onClose={() => setCorporateOpen(false)}
+              onHoverEnter={() => {
+                if (corporateCloseRef.current) {
+                  clearTimeout(corporateCloseRef.current);
+                  corporateCloseRef.current = null;
+                }
+              }}
+              onHoverLeave={() => {
+                corporateCloseRef.current = setTimeout(() => setCorporateOpen(false), 150);
+              }}
               t={t}
               pathname={pathname}
             />
           </div>
 
-          {/* Hizmetler dropdown */}
-          <div className="relative">
+          {/* Hizmetler dropdown - hover */}
+          <div
+            className="relative"
+            onMouseEnter={() => {
+              if (corporateCloseRef.current) {
+                clearTimeout(corporateCloseRef.current);
+                corporateCloseRef.current = null;
+              }
+              setServicesOpen(true);
+              setCorporateOpen(false);
+            }}
+            onMouseLeave={() => {
+              servicesCloseRef.current = setTimeout(() => setServicesOpen(false), 120);
+            }}
+          >
             <DropdownTrigger
               label={t("nav.services")}
               isOpen={servicesOpen}
@@ -258,6 +308,15 @@ export default function Navbar() {
               items={servicesItems}
               isOpen={servicesOpen}
               onClose={() => setServicesOpen(false)}
+              onHoverEnter={() => {
+                if (servicesCloseRef.current) {
+                  clearTimeout(servicesCloseRef.current);
+                  servicesCloseRef.current = null;
+                }
+              }}
+              onHoverLeave={() => {
+                servicesCloseRef.current = setTimeout(() => setServicesOpen(false), 150);
+              }}
               t={t}
               pathname={pathname}
             />

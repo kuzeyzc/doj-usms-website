@@ -164,24 +164,6 @@ export default function BlogPage() {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Admin bar */}
-      {isAdmin && (
-        <div className="sticky top-0 z-40 flex items-center justify-between px-4 py-2 text-sm border-b border-border bg-surface-elevated text-muted-foreground">
-          <span>
-            {t("blog.adminWelcome")} | {t("blog.adminManagement")}
-          </span>
-          <Link to="/admin/blog">
-            <Button
-              size="sm"
-              className="font-heading uppercase tracking-wider"
-              style={{ backgroundColor: GOLD, color: "#000" }}
-            >
-              {t("blog.createNew")}
-            </Button>
-          </Link>
-        </div>
-      )}
-
       <main className="pt-16">
         {/* Header banner */}
         <section
