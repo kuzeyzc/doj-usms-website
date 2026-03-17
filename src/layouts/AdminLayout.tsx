@@ -18,7 +18,7 @@ import {
   SidebarMenuButton,
   SidebarInset,
 } from "@/components/ui/sidebar";
-import { Shield, Settings, Users, FileText, Gavel, HelpCircle, Image, ClipboardList, LayoutDashboard, FileEdit, Scale } from "lucide-react";
+import { Shield, Settings, Users, FileText, Gavel, HelpCircle, Image, ClipboardList, LayoutDashboard, FileEdit, Scale, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -33,6 +33,7 @@ const navItems = [
   { to: "/admin/applications", icon: ClipboardList, label: "Başvurular" },
   { to: "/admin/warrants", icon: Scale, label: "Adli Talepler" },
   { to: "/admin/form-editor", icon: FileEdit, label: "Form Editörü" },
+  { to: "/admin/blog", icon: Newspaper, label: "Blog" },
 ];
 
 export default function AdminLayout() {

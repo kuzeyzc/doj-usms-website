@@ -13,6 +13,8 @@
     "warrant": "Adli Talep",
     "documentGenerator": "Belge Oluşturucu",
     "staffLogin": "Personel Girişi",
+    "welcomeAdmin": "Hoşgeldin, Admin",
+    "adminPanel": "Admin Paneli",
     "brand": "U.S. MARSHALS"
   },
   "hero": {
@@ -245,6 +247,23 @@
     "uploadLogo": "Logo Yükle",
     "removeLogo": "Yüklenen logoyu kaldır",
     "exportPdf": "PDF İndir"
+  },
+  "blog": {
+    "title": "TÜM BLOGLAR",
+    "searchPlaceholder": "Başlık, kategori veya yazar ara...",
+    "searchNoResults": "Arama sonucu bulunamadı.",
+    "readMore": "Devamını Oku",
+    "loadMore": "DAHA FAZLA YÜKLE",
+    "loading": "Yükleniyor...",
+    "empty": "Henüz blog yazısı bulunmuyor.",
+    "createFirst": "İlk Blogu Oluştur",
+    "createNew": "Yeni Blog Oluştur",
+    "adminWelcome": "Hoşgeldin, Admin",
+    "adminManagement": "Blog Yönetimi",
+    "placeholder": "Görsel Yok",
+    "notFound": "Blog yazısı bulunamadı.",
+    "backToList": "Blog Listesine Dön",
+    "latestPosts": "SON BLOGLAR"
   },
   "404": {
     "title": "404",

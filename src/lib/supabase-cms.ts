@@ -14,6 +14,20 @@ export async function uploadGalleryImage(file: File): Promise<{ url: string } | 
   return { url: data.publicUrl };
 }
 
+export async function uploadBlogImage(file: File): Promise<{ url: string } | { error: string }> {
+  if (!supabase) return { error: "Supabase not configured" };
+  const ext = (file.name.split(".").pop()?.toLowerCase() || "png").replace(/[^a-z0-9]/g, "");
+  const path = `blog/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const { error } = await supabase.storage.from("gallery").upload(path, file, {
+    cacheControl: "3600",
+    upsert: true,
+    contentType: file.type || "image/png",
+  });
+  if (error) return { error: error.message };
+  const { data } = supabase.storage.from("gallery").getPublicUrl(path);
+  return { url: data.publicUrl };
+}
+
 export interface SiteSettings {
   general?: Record<string, string>;
   values?: Record<string, { title: string; text: string }>;
@@ -388,5 +402,82 @@ export async function updateWarrantStatus(
   const payload: Record<string, unknown> = { status };
   if (judgeNote !== undefined) payload.judge_note = judgeNote;
   const { error } = await supabase.from("warrants").update(payload).eq("id", id);
+  return !error;
+}
+
+/** Blog Posts */
+export interface BlogPost {
+  id: string;
+  title: string;
+  category: string;
+  image_url: string | null;
+  content: string;
+  excerpt: string | null;
+  author: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function fetchBlogPosts(limit = 9, offset = 0): Promise<BlogPost[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
+  if (error) {
+    console.error("fetchBlogPosts error:", error);
+    return [];
+  }
+  return (data ?? []) as BlogPost[];
+}
+
+export async function fetchBlogPostById(id: string): Promise<BlogPost | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) {
+    console.error("fetchBlogPostById error:", error);
+    return null;
+  }
+  return data as BlogPost | null;
+}
+
+export async function insertBlogPost(
+  post: Omit<BlogPost, "id" | "created_at" | "updated_at">
+): Promise<string | null> {
+  if (!supabase) return null;
+  const payload = {
+    ...post,
+    updated_at: new Date().toISOString(),
+  };
+  const { data, error } = await supabase
+    .from("blog_posts")
+    .insert(payload)
+    .select("id")
+    .single();
+  if (error) {
+    console.error("insertBlogPost error:", error);
+    return null;
+  }
+  return data?.id ?? null;
+}
+
+export async function updateBlogPost(
+  id: string,
+  post: Partial<Omit<BlogPost, "id" | "created_at">>
+): Promise<boolean> {
+  if (!supabase) return false;
+  const payload = { ...post, updated_at: new Date().toISOString() };
+  const { error } = await supabase.from("blog_posts").update(payload).eq("id", id);
+  return !error;
+}
+
+export async function deleteBlogPost(id: string): Promise<boolean> {
+  if (!supabase) return false;
+  const { error } = await supabase.from("blog_posts").delete().eq("id", id);
   return !error;
 }

@@ -18,6 +18,7 @@ import GalleryPage from "./pages/GalleryPage.tsx";
 import ApplyPage from "./pages/ApplyPage.tsx";
 import FaqPage from "./pages/FaqPage.tsx";
 import BlogPage from "./pages/BlogPage.tsx";
+import BlogPostDetailPage from "./pages/BlogPostDetailPage.tsx";
 import WarrantFormPage from "./pages/WarrantFormPage.tsx";
 import DocumentGeneratorPage from "./pages/DocumentGeneratorPage.tsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.tsx";
@@ -30,6 +31,7 @@ import AdminGallery from "./pages/admin/AdminGallery.tsx";
 import AdminApplications from "./pages/admin/AdminApplications.tsx";
 import AdminFormEditor from "./pages/admin/AdminFormEditor.tsx";
 import AdminWarrants from "./pages/admin/AdminWarrants.tsx";
+import AdminBlog from "./pages/admin/AdminBlog.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -62,6 +64,7 @@ function AppContent() {
             <Route path="/document-generator" element={<DocumentGeneratorPage />} />
             <Route path="/faq" element={<FaqPage />} />
             <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:id" element={<BlogPostDetailPage />} />
             <Route path="*" element={<NotFound />} />
           </Route>
           <Route path="/admin" element={<AdminLayout />}>
@@ -75,6 +78,7 @@ function AppContent() {
             <Route path="applications" element={<AdminApplications />} />
             <Route path="warrants" element={<AdminWarrants />} />
             <Route path="form-editor" element={<AdminFormEditor />} />
+            <Route path="blog" element={<AdminBlog />} />
           </Route>
         </Routes>
       </BrowserRouter>

@@ -15,12 +15,16 @@ import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 
 const DEPARTMENTS: { id: string; name: string; logo: string | null }[] = [
-  { id: "DOJ", name: "DEPARTMENT OF JUSTICE", logo: "/logo-doj.png" },
-  { id: "USMS", name: "UNITED STATES MARSHALS SERVICE", logo: null },
-  { id: "MRPD", name: "LOS SANTOS METROPOLITAN POLICE", logo: null },
-  { id: "BCSO", name: "BLAINE COUNTY SHERIFF'S OFFICE", logo: null },
-  { id: "SAHP", name: "SAN ANDREAS HIGHWAY PATROL", logo: null },
-  { id: "LSPD", name: "LOS SANTOS POLICE DEPARTMENT", logo: null },
+  { id: "DOJ", name: "Department Of Justice", logo: "/logo-doj.png" },
+  { id: "USMS", name: "United States Marshal Service", logo: "logo-usms.png" },
+  { id: "MRPD", name: "Mission Row Police Department", logo: "logo-mrpd.png" },
+  { id: "VPD", name: "Vinewood Police Department", logo: "logo-vinewood.png" },
+  { id: "SAHP", name: "San Andreas Highway Patrol", logo: "logo-sahp.png" },
+  { id: "DSD", name: "Davis Sheriff Department", logo: "logo-dsd.png" },
+  { id: "BCSO", name: "Blaine County Sheriff Office", logo: "logo-bcso.png" },
+  { id: "PBSO", name: "Paleto Bay Sheriff Office", logo: "logo-pbso.png" },
+  { id: "PR", name: "Park Ranger", logo: "logo-pr.png" },
+  { id: "EMS", name: "Emergency Medical Services", logo: "logo-ems.png" },
 ];
 
 function generateFileNumber(deptId: string): string {
@@ -281,11 +285,11 @@ export default function DocumentGeneratorPage() {
                         <img
                           src={displayLogo}
                           alt={department.name}
-                          className="h-24 w-auto object-contain"
+                          className="h-28 w-auto object-contain"
                         />
                       ) : (
-                        <div className="w-24 h-24 flex items-center justify-center rounded-full bg-primary/10 border-2 border-primary/30">
-                          <Shield className="w-12 h-12 text-primary" strokeWidth={1.5} />
+                        <div className="w-28 h-28 flex items-center justify-center rounded-full bg-primary/10 border-2 border-primary/30">
+                          <Shield className="w-14 h-14 text-primary" strokeWidth={1.5} />
                         </div>
                       )}
                     </div>
@@ -321,7 +325,7 @@ export default function DocumentGeneratorPage() {
 
                     {/* Rich Text Content */}
                     <div
-                      className="prose prose-sm max-w-none text-gray-800 mb-10 document-content font-body"
+                      className="prose prose-sm max-w-none text-gray-800 mb-10 document-content font-body [&_p]:my-0.5 [&_li]:my-0.5 [&_p:empty]:!my-0 [&_p:empty]:!hidden"
                       style={{ minHeight: "120px", fontFamily: "'Lato', 'Segoe UI', Arial, sans-serif" }}
                       dangerouslySetInnerHTML={{ __html: content || "<p><br></p>" }}
                     />

@@ -7,6 +7,8 @@ import {
   fetchFaq,
   fetchGallery,
   fetchServerStats,
+  fetchBlogPosts,
+  fetchBlogPostById,
 } from "@/lib/supabase-cms";
 import { isSupabaseEnabled } from "@/lib/supabase";
 import type { ChainOfCommandItem, RuleCategory, FaqItem, GalleryItem } from "@/lib/supabase-cms";
@@ -141,6 +143,24 @@ export function useGalleryData() {
     enabled: isSupabaseEnabled,
   });
   return db;
+}
+
+/** Blog posts with pagination */
+export function useBlogData(limit = 9, offset = 0) {
+  return useQuery({
+    queryKey: ["blog", limit, offset],
+    queryFn: () => fetchBlogPosts(limit, offset),
+    enabled: isSupabaseEnabled,
+  });
+}
+
+/** Single blog post by ID */
+export function useBlogPost(id: string | undefined) {
+  return useQuery({
+    queryKey: ["blogPost", id],
+    queryFn: () => (id ? fetchBlogPostById(id) : Promise.resolve(null)),
+    enabled: isSupabaseEnabled && !!id,
+  });
 }
 
 /** server_stats: savci_count, usms_count (Başsavcı/USMS aktiflik sayaçları) */

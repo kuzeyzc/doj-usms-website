@@ -1,10 +1,9 @@
 ﻿import { useState, useEffect, useRef } from "react";
 import { useSiteSettings } from "@/hooks/useSiteData";
 import { Link, useLocation } from "react-router-dom";
-import { isAdminAuthenticated } from "@/lib/admin";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
-import { Menu, X, Shield, Sun, Moon, ChevronDown, Key, LayoutDashboard } from "lucide-react";
+import { Menu, X, Shield, Sun, Moon, ChevronDown, Key } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 /* Kurumsal: Kurallar, Blog, SSS */
@@ -167,7 +166,6 @@ export default function Navbar() {
   const { general } = useSiteSettings();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const isAdmin = isAdminAuthenticated();
 
   useEffect(() => {
     setMounted(true);
@@ -275,29 +273,15 @@ export default function Navbar() {
             {t("nav.apply")}
           </Link>
 
-          {/* Admin / Personel Girişi */}
-          {isAdmin ? (
-            <div className="ml-2 flex flex-col items-end gap-1">
-              <span className="text-sm font-heading font-medium text-primary">{t("nav.welcomeAdmin")}</span>
-              <Link
-                to="/admin"
-                className="flex items-center gap-2 px-3 py-1.5 text-xs font-heading font-medium text-muted-foreground 
-                  hover:text-foreground transition-all duration-300 rounded-md hover:bg-primary/5 border border-primary/20"
-              >
-                <LayoutDashboard className="w-3.5 h-3.5" />
-                {t("nav.adminPanel")}
-              </Link>
-            </div>
-          ) : (
-            <Link
-              to="/admin"
-              className="ml-2 flex items-center gap-2 px-3 py-2 text-sm font-heading font-medium text-muted-foreground 
-                hover:text-foreground transition-all duration-300 rounded-md hover:bg-primary/5 border border-transparent hover:border-primary/20"
-            >
-              <Key className="w-4 h-4" />
-              <span className="hidden xl:inline">{t("nav.staffLogin")}</span>
-            </Link>
-          )}
+          {/* Personel Girişi */}
+          <Link
+            to="/admin"
+            className="ml-2 flex items-center gap-2 px-3 py-2 text-sm font-heading font-medium text-muted-foreground 
+              hover:text-foreground transition-all duration-300 rounded-md hover:bg-primary/5 border border-transparent hover:border-primary/20"
+          >
+            <Key className="w-4 h-4" />
+            <span className="hidden xl:inline">{t("nav.staffLogin")}</span>
+          </Link>
 
           {/* Tema Toggle */}
           {mounted && (
@@ -446,29 +430,15 @@ export default function Navbar() {
                 </Link>
               </div>
 
-              {/* Admin / Personel Girişi - mobile */}
-              {isAdmin ? (
-                <div className="border-t border-primary/10 mt-1 pt-2 flex flex-col gap-2">
-                  <span className="px-4 text-sm font-heading font-medium text-primary">{t("nav.welcomeAdmin")}</span>
-                  <Link
-                    to="/admin"
-                    onClick={() => setOpen(false)}
-                    className="flex items-center gap-2 px-4 py-3 text-sm font-heading font-medium text-muted-foreground hover:text-foreground rounded-md bg-primary/5 border border-primary/20"
-                  >
-                    <LayoutDashboard className="w-4 h-4" />
-                    {t("nav.adminPanel")}
-                  </Link>
-                </div>
-              ) : (
-                <Link
-                  to="/admin"
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-2 px-4 py-3 text-sm font-heading font-medium text-muted-foreground hover:text-foreground rounded-md mt-1"
-                >
-                  <Key className="w-4 h-4" />
-                  {t("nav.staffLogin")}
-                </Link>
-              )}
+              {/* Personel Girişi - mobile */}
+              <Link
+                to="/admin"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 px-4 py-3 text-sm font-heading font-medium text-muted-foreground hover:text-foreground rounded-md mt-1"
+              >
+                <Key className="w-4 h-4" />
+                {t("nav.staffLogin")}
+              </Link>
             </div>
           </motion.div>
         )}
@@ -476,3 +446,4 @@ export default function Navbar() {
     </nav>
   );
 }
+
