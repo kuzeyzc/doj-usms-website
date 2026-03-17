@@ -9,6 +9,7 @@ import {
   fetchServerStats,
   fetchBlogPosts,
   fetchBlogPostById,
+  fetchBlogPostBySlug,
 } from "@/lib/supabase-cms";
 import { isSupabaseEnabled } from "@/lib/supabase";
 import type { ChainOfCommandItem, RuleCategory, FaqItem, GalleryItem } from "@/lib/supabase-cms";
@@ -154,12 +155,19 @@ export function useBlogData(limit = 9, offset = 0) {
   });
 }
 
-/** Single blog post by ID */
-export function useBlogPost(id: string | undefined) {
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Single blog post by slug or ID (UUID için geriye dönük uyumluluk) */
+export function useBlogPost(slugOrId: string | undefined) {
   return useQuery({
-    queryKey: ["blogPost", id],
-    queryFn: () => (id ? fetchBlogPostById(id) : Promise.resolve(null)),
-    enabled: isSupabaseEnabled && !!id,
+    queryKey: ["blogPost", slugOrId],
+    queryFn: () =>
+      slugOrId
+        ? UUID_REGEX.test(slugOrId)
+          ? fetchBlogPostById(slugOrId)
+          : fetchBlogPostBySlug(slugOrId)
+        : Promise.resolve(null),
+    enabled: isSupabaseEnabled && !!slugOrId,
   });
 }
 

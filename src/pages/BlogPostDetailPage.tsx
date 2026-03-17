@@ -10,9 +10,9 @@ import { tr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 
 export default function BlogPostDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const { t } = useTranslation();
-  const { data: post, isLoading, error } = useBlogPost(id);
+  const { data: post, isLoading, error } = useBlogPost(slug);
   const { data: allPosts = [] } = useBlogData(3, 0);
 
   const recentPosts = allPosts.slice(0, 3);
@@ -137,7 +137,7 @@ export default function BlogPostDetailPage() {
                   {recentPosts.map((p) => (
                     <Link
                       key={p.id}
-                      to={`/blog/${p.id}`}
+                      to={`/blog/${p.slug || p.id}`}
                       className="flex gap-3 p-3 rounded-xl bg-surface-elevated border border-border hover:border-primary/40 hover:bg-surface-elevated/80 transition-all group"
                     >
                       <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-muted">

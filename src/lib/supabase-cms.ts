@@ -409,6 +409,7 @@ export async function updateWarrantStatus(
 export interface BlogPost {
   id: string;
   title: string;
+  slug?: string; // migration sonrası zorunlu; eski veri için opsiyonel
   category: string;
   image_url: string | null;
   content: string;
@@ -416,6 +417,18 @@ export interface BlogPost {
   author: string;
   created_at: string;
   updated_at: string;
+}
+
+/** Başlıktan URL dostu slug üretir (Türkçe karakter desteği) */
+export function titleToSlug(title: string): string {
+  const trMap: Record<string, string> = {
+    ç: "c", ğ: "g", ı: "i", ö: "o", ş: "s", ü: "u",
+    Ç: "c", Ğ: "g", İ: "i", Ö: "o", Ş: "s", Ü: "u",
+  };
+  let s = title.trim().toLowerCase();
+  for (const [k, v] of Object.entries(trMap)) s = s.replaceAll(k, v);
+  s = s.replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-").replace(/^-|-$/g, "");
+  return s || "blog";
 }
 
 export async function fetchBlogPosts(limit = 9, offset = 0): Promise<BlogPost[]> {
@@ -446,12 +459,35 @@ export async function fetchBlogPostById(id: string): Promise<BlogPost | null> {
   return data as BlogPost | null;
 }
 
+export async function fetchBlogPostBySlug(slug: string): Promise<BlogPost | null> {
+  if (!supabase || !slug) return null;
+  const { data, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .eq("slug", slug)
+    .maybeSingle();
+  if (error) {
+    console.error("fetchBlogPostBySlug error:", error);
+    return null;
+  }
+  return data as BlogPost | null;
+}
+
 export async function insertBlogPost(
-  post: Omit<BlogPost, "id" | "created_at" | "updated_at">
+  post: Omit<BlogPost, "id" | "created_at" | "updated_at" | "slug"> & { slug?: string }
 ): Promise<string | null> {
   if (!supabase) return null;
+  let slug = post.slug ?? titleToSlug(post.title);
+  const { data: similar } = await supabase.from("blog_posts").select("slug").ilike("slug", slug + "%");
+  const used = new Set((similar || []).map((r) => (r as { slug: string }).slug));
+  if (used.has(slug)) {
+    let n = 2;
+    while (used.has(`${slug}-${n}`)) n++;
+    slug = `${slug}-${n}`;
+  }
   const payload = {
     ...post,
+    slug,
     updated_at: new Date().toISOString(),
   };
   const { data, error } = await supabase
@@ -471,7 +507,20 @@ export async function updateBlogPost(
   post: Partial<Omit<BlogPost, "id" | "created_at">>
 ): Promise<boolean> {
   if (!supabase) return false;
-  const payload = { ...post, updated_at: new Date().toISOString() };
+  const payload: Record<string, unknown> = { ...post, updated_at: new Date().toISOString() };
+  if (post.title !== undefined) {
+    let slug = titleToSlug(post.title);
+    const { data: similar } = await supabase.from("blog_posts").select("slug,id").ilike("slug", slug + "%");
+    const used = new Set(
+      (similar || []).filter((r) => (r as { id: string }).id !== id).map((r) => (r as { slug: string }).slug)
+    );
+    if (used.has(slug)) {
+      let n = 2;
+      while (used.has(`${slug}-${n}`)) n++;
+      slug = `${slug}-${n}`;
+    }
+    payload.slug = slug;
+  }
   const { error } = await supabase.from("blog_posts").update(payload).eq("id", id);
   return !error;
 }

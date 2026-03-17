@@ -58,7 +58,7 @@ function BlogCard({
   const { lines: bullets, hasMore } = parseContentToBullets(post.content);
 
   return (
-    <Link to={`/blog/${post.id}`} className="block h-full">
+    <Link to={`/blog/${post.slug || post.id}`} className="block h-full">
       <motion.article
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}

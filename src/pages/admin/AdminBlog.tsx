@@ -39,7 +39,7 @@ const quillModules = {
   ],
 };
 
-const emptyPost: Omit<BlogPost, "id" | "created_at" | "updated_at"> = {
+const emptyPost: Omit<BlogPost, "id" | "created_at" | "updated_at" | "slug"> = {
   title: "",
   category: "",
   image_url: null,
@@ -250,7 +250,7 @@ export default function AdminBlog() {
                     <Trash2 className="w-3 h-3" />
                     Sil
                   </Button>
-                  <Link to={`/blog/${post.id}`} target="_blank">
+                  <Link to={`/blog/${post.slug || post.id}`} target="_blank">
                     <Button variant="ghost" size="sm">
                       Görüntüle
                     </Button>

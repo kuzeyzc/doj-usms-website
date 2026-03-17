@@ -64,7 +64,7 @@ function AppContent() {
             <Route path="/document-generator" element={<DocumentGeneratorPage />} />
             <Route path="/faq" element={<FaqPage />} />
             <Route path="/blog" element={<BlogPage />} />
-            <Route path="/blog/:id" element={<BlogPostDetailPage />} />
+            <Route path="/blog/:slug" element={<BlogPostDetailPage />} />
             <Route path="*" element={<NotFound />} />
           </Route>
           <Route path="/admin" element={<AdminLayout />}>
