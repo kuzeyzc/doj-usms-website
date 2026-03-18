@@ -125,7 +125,7 @@ export default function ApplyPage() {
         const questionLabels = Object.fromEntries(
           scenarioQuestions.map((q) => [q.id, q.question_text.length > 256 ? q.question_text.slice(0, 253) + "..." : q.question_text])
         );
-        await sendApplicationToDiscord(
+        const discordOk = await sendApplicationToDiscord(
           {
             name: payload.name as string,
             discord: payload.discord as string,
@@ -138,6 +138,7 @@ export default function ApplyPage() {
           },
           questionLabels
         );
+        if (!discordOk) toast.error(t("admin.applications.discordNotifyFailed"));
       } else {
         await new Promise((r) => setTimeout(r, 1500));
       }
