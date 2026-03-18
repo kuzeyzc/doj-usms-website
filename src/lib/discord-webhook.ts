@@ -1,29 +1,61 @@
 /**
  * Discord Webhook - Belge & Başvuru bildirimleri
  * DOJ Gold rengi: #D4AF37 = 13938587 (decimal)
+ *
+ * NOT: Discord API tarayıcıdan doğrudan çağrılamaz (CORS). Vercel API route
+ * veya Supabase Edge Function proxy üzerinden iletilir.
  */
-const DISCORD_WEBHOOK_DOCUMENTS =
-  import.meta.env.VITE_DISCORD_WEBHOOK_DOCUMENTS ||
-  "https://discord.com/api/webhooks/1482726349167788195/Czrs_6jXZyz8ZxlFyG_Gw59rNEefWIrb3D5zVHdAwzYyq41B3YpTmsfUbru69kdVH9qs";
+const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL ?? "").trim().replace(/\/$/, "");
+const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY ?? "").trim();
 
-/** #site-başvuru kanalı - Yeni başvuru formu gönderildiğinde */
-const DISCORD_WEBHOOK_APPLICATIONS =
-  import.meta.env.VITE_DISCORD_WEBHOOK_APPLICATIONS ||
-  "https://discord.com/api/webhooks/1482457570487832617/i51liDGOHUU_zQsEMPdOUR9Bc5gDNJMzaNN0s-G_sj2GwnZmCyfB7XvnJ0yVcovjThcY";
-
-/** #başvuru-onay kanalı - Başvuru onaylandığında bildirim */
-const DISCORD_WEBHOOK_APPLICATIONS_APPROVED =
-  import.meta.env.VITE_DISCORD_WEBHOOK_APPLICATIONS_APPROVED ||
-  "https://discord.com/api/webhooks/1482746444975837274/R_U6_vfffEXjO7_Z9FJ7-mARcnVw5GxJtgZ9c3_G_FBvBhCFWEXOQrJ-iflPec_H-L1n";
-
-/** Adli Talep kararları - Onay/Red bildirimi */
-const DISCORD_WEBHOOK_WARRANTS =
-  import.meta.env.VITE_DISCORD_WEBHOOK_WARRANTS ||
-  import.meta.env.VITE_DISCORD_WEBHOOK_URL ||
-  "";
+/** Vercel API route (aynı domain - deploy olduğunda çalışır) */
+const API_PROXY_URL = "/api/discord-webhook";
+/** Supabase Edge Function (alternatif) */
+const SUPABASE_PROXY_URL = supabaseUrl && supabaseAnonKey
+  ? `${supabaseUrl}/functions/v1/discord-webhook-proxy`
+  : null;
 
 const DOJ_GOLD = 0xd4af37; // #D4AF37
 const GREEN = 0x00ff00; // #00FF00 - Onay rengi
+
+/** Proxy üzerinden Discord'a gönder (CORS bypass) */
+async function sendToDiscordViaProxy(
+  type: "documents" | "applications" | "applications-approved" | "warrants",
+  body: object
+): Promise<boolean> {
+  const payload = { type, body };
+
+  // 1) Önce Vercel API route dene (aynı origin)
+  try {
+    const res = await fetch(API_PROXY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) return true;
+  } catch {
+    /* devam et */
+  }
+
+  // 2) Supabase Edge Function (alternatif)
+  if (SUPABASE_PROXY_URL) {
+    try {
+      const res = await fetch(SUPABASE_PROXY_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${supabaseAnonKey}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  return false;
+}
 
 export interface DocumentWebhookPayload {
   title: string;
@@ -140,17 +172,7 @@ export async function sendDocumentToDiscord(
   }
 
   const body = { embeds };
-
-  try {
-    const res = await fetch(DISCORD_WEBHOOK_DOCUMENTS, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
+  return sendToDiscordViaProxy("documents", body);
 }
 
 export interface ApplicationWebhookPayload {
@@ -202,17 +224,7 @@ export async function sendApplicationToDiscord(
       },
     ],
   };
-
-  try {
-    const res = await fetch(DISCORD_WEBHOOK_APPLICATIONS, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
+  return sendToDiscordViaProxy("applications", body);
 }
 
 /** Discord ID sayısal mı? (15-22 haneli) - <@ID> ile etiketleme için */
@@ -250,17 +262,7 @@ export async function sendApplicationApprovalToDiscord(
     ],
   };
   if (mention) body.content = mention;
-
-  try {
-    const res = await fetch(DISCORD_WEBHOOK_APPLICATIONS_APPROVED, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
+  return sendToDiscordViaProxy("applications-approved", body);
 }
 
 /** Adli Talep - her talep gönderildiğinde Discord'a embed olarak iletilir */
@@ -293,8 +295,6 @@ function formatWarrantRequestType(requestType: string, requestTypeOther?: string
 export async function sendWarrantToDiscord(
   payload: WarrantWebhookPayload & { requestTypeOther?: string }
 ): Promise<boolean> {
-  if (!DISCORD_WEBHOOK_WARRANTS) return false;
-
   const requestTypeLabel = formatWarrantRequestType(
     payload.requestType,
     payload.requestTypeOther
@@ -355,14 +355,5 @@ export async function sendWarrantToDiscord(
     });
   }
 
-  try {
-    const res = await fetch(DISCORD_WEBHOOK_WARRANTS, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ embeds }),
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
+  return sendToDiscordViaProxy("warrants", { embeds });
 }

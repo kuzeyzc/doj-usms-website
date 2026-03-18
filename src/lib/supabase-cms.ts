@@ -507,7 +507,11 @@ export async function updateBlogPost(
   post: Partial<Omit<BlogPost, "id" | "created_at">>
 ): Promise<boolean> {
   if (!supabase) return false;
-  const payload: Record<string, unknown> = { ...post, updated_at: new Date().toISOString() };
+  const payload: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  const allowed = ["title", "category", "image_url", "content", "excerpt", "author"] as const;
+  for (const k of allowed) {
+    if (post[k] !== undefined) payload[k] = post[k];
+  }
   if (post.title !== undefined) {
     let slug = titleToSlug(post.title);
     const { data: similar } = await supabase.from("blog_posts").select("slug,id").ilike("slug", slug + "%");
@@ -521,8 +525,13 @@ export async function updateBlogPost(
     }
     payload.slug = slug;
   }
-  const { error } = await supabase.from("blog_posts").update(payload).eq("id", id);
-  return !error;
+  const { data, error } = await supabase
+    .from("blog_posts")
+    .update(payload)
+    .eq("id", id)
+    .select("id");
+  if (error) return false;
+  return Array.isArray(data) && data.length > 0;
 }
 
 export async function deleteBlogPost(id: string): Promise<boolean> {
